@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1"/>
+  <title>SkyCast • Europe Weather Viewer</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;800&display=swap" rel="stylesheet">
+  <style>
+    :root{ --bg1:#06142e; --bg2:#19376d; --muted:#a9b8d4; --accent:#4dafff; --card:#0d224d; }
+    *{box-sizing:border-box}
+    body{margin:0; font-family:Poppins,system-ui,Segoe UI,Roboto,Helvetica,Arial,sans-serif; color:#eef3ff;
+         background:radial-gradient(1200px 600px at 80% -200px,#1a2b6a,transparent),
+                    linear-gradient(180deg,var(--bg1),var(--bg2)); min-height:100svh; display:flex; flex-direction:column}
+    header{padding:44px 18px 10px; text-align:center}
+    header h1{font-size: clamp(28px,4vw,46px); margin:0; letter-spacing:.5px; font-weight:800; color:var(--accent)}
+    header p{margin:6px 0 0; color:var(--muted)}
+    .bar{display:flex; gap:10px; justify-content:center; align-items:center; flex-wrap:wrap; margin:18px auto 8px; padding:10px}
+    select,button,input[type="range"]{appearance:none; border:none; outline:none; border-radius:14px; padding:12px 14px; font-weight:600}
+    select{background:var(--card); color:#e9f1ff; border:1px solid #2d4f91}
+    .btn{background:var(--card); color:#e9f1ff; border:1px solid #2d4f91; cursor:pointer}
+    .btn:hover{border-color:var(--accent)}
+    .muted{color:var(--muted)}
+    #status{display:grid; place-items:center; min-height:32px; color:var(--muted); margin-top:6px}
+
+    main{width:min(1200px,96%); margin:0 auto 48px; display:grid; gap:32px}
+    .frame{position:relative; padding:10px; border-radius:18px;
+           background:linear-gradient(180deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02));
+           border:1px solid rgba(255,255,255,0.12); box-shadow:0 16px 40px rgba(0,0,0,.45);}
+    .wrap{--z:1; transform:scale(var(--z)); transform-origin:top center; transition:transform .25s ease}
+    .forecast-img{display:block; width:100%; height:auto; border-radius:12px; image-rendering: -webkit-optimize-contrast;}
+    .toolbar{display:flex; gap:10px; justify-content:space-between; align-items:center; margin:12px 0}
+    .left,.right{display:flex; gap:10px; align-items:center}
+    .caption{font-size:14px; color:var(--muted)}
+
+    .cards{display:grid; grid-template-columns:repeat(auto-fill,minmax(150px,1fr)); gap:18px}
+    .card{background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.12); border-radius:16px; padding:14px; text-align:center;
+          box-shadow:0 8px 22px rgba(0,0,0,.35); transition:transform .25s ease}
+    .card:hover{transform:translateY(-4px); box-shadow:0 12px 28px rgba(0,0,0,.45)}
+    .card .date{font-weight:700; margin-bottom:6px}
+    .card .icon{margin:6px 0}
+    .card .icon img{width:56px; height:56px; object-fit:contain; filter:drop-shadow(0 2px 3px rgba(0,0,0,.5))}
+    .card .summary{font-weight:600; margin-top:4px}
+    .temps{margin-top:6px; font-weight:700}
+    .temps .hi{color:#ffd166; margin-right:6px}
+    .temps .lo{color:#9fd3ff}
+
+    footer{opacity:.7; text-align:center; padding:18px; font-size:13px; color:var(--muted)}
+  </style>
+</head>
+<body>
+  <header>
+    <h1>SkyCast</h1>
+    <p>Europe • 7-Day Weather Diagram + Cards</p>
+    <div class="bar" role="group" aria-label="Controls">
+      <label for="city" class="sr-only">Choose a city</label>
+      <select id="city" title="City"></select>
+      <select id="unit" title="Units">
+        <option value="metric">Metric (°C)</option>
+        <option value="british">Imperial (°F)</option>
+      </select>
+      <input id="zoom" type="range" min="0.8" max="1.4" step="0.05" value="1" title="Zoom"/>
+      <button class="btn" id="refresh" title="Refresh">Refresh</button>
+      <button class="btn" id="download" title="Download PNG">Download</button>
+      <button class="btn" id="open7" title="Open on 7Timer!">Open on 7Timer!</button>
+    </div>
+    <div class="powered muted">Data by <a class="muted" href="https://www.7timer.info" target="_blank" rel="noopener">7Timer!</a></div>
+  </header>
+
+  <div id="status" aria-live="polite"></div>
+
+  <main>
+    <div class="frame">
+      <div class="wrap" id="wrap">
+        <img id="forecast" class="forecast-img" alt="Weather forecast diagram"/>
+      </div>
+      <div class="toolbar">
+        <div class="left caption" id="caption">&nbsp;</div>
+        <div class="right caption" id="meta">&nbsp;</div>
+      </div>
+    </div>
+
+    <section id="cards" class="cards" aria-label="Daily forecast cards"></section>
+  </main>
+
+  <footer>© <span id="year"></span> SkyCast • Open-source learning project</footer>
+
+  <script>
+  const CITIES = [
+    {name:"Amsterdam, Netherlands", lat:52.3676, lon:4.9041},
+    {name:"Athens, Greece", lat:37.9838, lon:23.7275},
+    {name:"Barcelona, Spain", lat:41.3874, lon:2.1686},
+    {name:"Berlin, Germany", lat:52.52, lon:13.4050},
+    {name:"Budapest, Hungary", lat:47.4979, lon:19.0402},
+    {name:"Copenhagen, Denmark", lat:55.6761, lon:12.5683},
+    {name:"Dublin, Ireland", lat:53.3498, lon:-6.2603},
+    {name:"Edinburgh, UK", lat:55.9533, lon:-3.1883},
+    {name:"Helsinki, Finland", lat:60.1699, lon:24.9384},
+    {name:"Lisbon, Portugal", lat:38.7223, lon:-9.1393},
+    {name:"London, UK", lat:51.5074, lon:-0.1278},
+    {name:"Madrid, Spain", lat:40.4168, lon:-3.7038},
+    {name:"Oslo, Norway", lat:59.9139, lon:10.7522},
+    {name:"Paris, France", lat:48.8566, lon:2.3522},
+    {name:"Prague, Czechia", lat:50.0755, lon:14.4378},
+    {name:"Reykjavík, Iceland", lat:64.1466, lon:-21.9426},
+    {name:"Rome, Italy", lat:41.9028, lon:12.4964},
+    {name:"Stockholm, Sweden", lat:59.3293, lon:18.0686},
+    {name:"Tallinn, Estonia", lat:59.437, lon:24.7536},
+    {name:"Vienna, Austria", lat:48.2082, lon:16.3738},
+    {name:"Warsaw, Poland", lat:52.2297, lon:21.0122},
+    {name:"Zurich, Switzerland", lat:47.3769, lon:8.5417}
+  ];
+
+  const citySel = document.getElementById('city');
+  const unitSel = document.getElementById('unit');
+  const zoom = document.getElementById('zoom');
+  const refreshBtn = document.getElementById('refresh');
+  const openBtn = document.getElementById('open7');
+  const dlBtn = document.getElementById('download');
+  const forecastImg = document.getElementById('forecast');
+  const status = document.getElementById('status');
+  const wrap = document.getElementById('wrap');
+  const caption = document.getElementById('caption');
+  const meta = document.getElementById('meta');
+  const cards = document.getElementById('cards');
+
+  document.getElementById('year').textContent = new Date().getFullYear();
+
+  CITIES.forEach((c,i)=>{ const opt=document.createElement('option'); opt.value=i; opt.textContent=c.name; citySel.appendChild(opt); });
+  citySel.value = +localStorage.getItem('cityIndex') || 0;
+  unitSel.value = localStorage.getItem('unit') || 'metric';
+
+  citySel.addEventListener('change', ()=>{ localStorage.setItem('cityIndex', citySel.value); loadDiagram(true); });
+  unitSel.addEventListener('change', ()=>{ localStorage.setItem('unit', unitSel.value); loadDiagram(true); });
+  zoom.addEventListener('input', ()=>{ wrap.style.setProperty('--z', zoom.value); });
+  refreshBtn.addEventListener('click', ()=> loadDiagram(true));
+
+  function buildGraphicalURL(lat, lon){
+    const unit = unitSel.value; // 'metric' or 'british'
+    return `https://www.7timer.info/bin/astro.php?lon=${lon}&lat=${lat}&ac=0&lang=en&unit=${unit}&output=internal&tzshift=0`;
+  }
+
+  function setButtons(url){
+    openBtn.onclick = ()=> window.open(url, '_blank');
+    dlBtn.onclick = ()=> {
+      const a=document.createElement('a');
+      a.href=url;
+      a.download = `skycast_${Date.now()}.png`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+    };
+  }
+
+  async function fetchCivil(lat, lon){
+    const url = `https://www.7timer.info/bin/api.pl?lon=${lon}&lat=${lat}&product=civil&output=json`;
+    const resp = await fetch(url);
+    if(!resp.ok) throw new Error(`Network ${resp.status}`);
+    return resp.json();
+  }
+
+  function cToF(c){return (c*9/5)+32}
+  function formatTemp(c){ const v = unitSel.value==='british'? cToF(c) : c; return Math.round(v); }
+
+  function toDateFromInit(init, hours){
+    const norm=init.replace(/\s/g,'');
+    const y=+norm.slice(0,4), m=+norm.slice(4,6)-1, d=+norm.slice(6,8), hh=+norm.slice(8,10)||0;
+    const dt=new Date(Date.UTC(y,m,d,hh));
+    dt.setUTCHours(dt.getUTCHours()+hours);
+    return dt;
+  }
+
+  function groupDaily(api){
+    const days={}; const init=api.init||'';
+    for(const row of api.dataseries){
+      const date=toDateFromInit(init,row.timepoint);
+      const key=date.toISOString().split('T')[0];
+      if(!days[key]) days[key]={temps:[], weathers:[], date};
+      days[key].temps.push(row.temp2m);
+      days[key].weathers.push(row.weather);
+    }
+    return Object.values(days).sort((a,b)=>a.date-b.date).slice(0,7).map(d=>{
+      const hi=Math.max(...d.temps), lo=Math.min(...d.temps);
+      const freq={}; d.weathers.forEach(w=>freq[w]=(freq[w]||0)+1);
+      const iconKey=Object.keys(freq).sort((a,b)=>freq[b]-freq[a])[0];
+      return {date:d.date, hi, lo, iconKey};
+    });
+  }
+
+  // map 7Timer condition keys -> your icon filenames in /icons
+  const WEATHER_ICON = {
+    clear:"icons/sun.png",
+    pcloudy:"icons/partly_cloudy.png",
+    mcloudy:"icons/mostly_cloudy.png",
+    cloudy:"icons/cloud.png",
+    humid:"icons/humid.png",
+    lightrain:"icons/light_rain.png",
+    oshower:"icons/showers.png",
+    ishower:"icons/showers.png",
+    lightsnow:"icons/light_snow.png",
+    snow:"icons/snow.png",
+    rainsnow:"icons/rain_snow.png",
+    rain:"icons/rain.png",
+    heavyrain:"icons/heavy_rain.png",
+    ts:"icons/thunderstorm.png",
+    tstorm:"icons/thunderstorm.png",
+    fog:"icons/fog.png",
+    windy:"icons/windy.png",
+    hail:"icons/hail.png"
+  };
+
+  const WEATHER_LABEL = {
+    clear:"Clear", pcloudy:"Partly cloudy", mcloudy:"Mostly cloudy", cloudy:"Cloudy", humid:"Humid",
+    lightrain:"Light rain", oshower:"Occasional showers", ishower:"Isolated showers",
+    lightsnow:"Light snow", snow:"Snow", rainsnow:"Rain & snow", rain:"Rain", heavyrain:"Heavy rain",
+    ts:"Thunderstorm", tstorm:"Thunderstorm", fog:"Fog", windy:"Windy", hail:"Hail"
+  };
+
+  function renderCards(data){
+    cards.innerHTML='';
+    data.forEach(d=>{
+      const el=document.createElement('div');
+      el.className='card';
+      const dt=d.date; const day=dt.toLocaleDateString(undefined,{weekday:'short'});
+      const m=dt.toLocaleDateString(undefined,{month:'short'}); const dd=dt.getDate();
+      const iconPath = WEATHER_ICON[d.iconKey] || "icons/default.png";
+      el.innerHTML=`<div class="date">${day} ${m} ${dd}</div>
+        <div class="icon"><img src="${iconPath}" alt="${WEATHER_LABEL[d.iconKey]||d.iconKey}"/></div>
+        <div class="summary">${WEATHER_LABEL[d.iconKey]||d.iconKey}</div>
+        <div class="temps"><span class="hi">H: ${formatTemp(d.hi)}°</span><span class="lo">L: ${formatTemp(d.lo)}°</span></div>`;
+      cards.appendChild(el);
+    });
+  }
+
+  async function loadDiagram(bust=false){
+    const city = CITIES[+citySel.value];
+    let url = buildGraphicalURL(city.lat, city.lon);
+    if(bust){ url += `&v=${Date.now()}`; }
+    status.textContent = `Loading forecast for ${city.name}…`;
+    forecastImg.src = url;
+    forecastImg.onload = ()=>{
+      status.textContent = '';
+      caption.textContent = `${city.name}`;
+      meta.textContent = `Units: ${unitSel.value === 'metric' ? '°C' : '°F'} • Source: 7Timer!`;
+      setButtons(url);
+    };
+    forecastImg.onerror = ()=> status.textContent = 'Could not load forecast image.';
+
+    try{
+      const api = await fetchCivil(city.lat, city.lon);
+      const daily = groupDaily(api);
+      renderCards(daily);
+    }catch(err){ console.error(err); }
+  }
+
+  loadDiagram();
+  </script>
+</body>
+</html>
