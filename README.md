@@ -11,7 +11,7 @@ It combines:
 ## 📸 Screenshots
 
 ### Home Page
-![SkyCast Home](screenshots/home.png)
+![SkyCast Home](SC/Screenshot From 2025-09-07 20-09-03.png)
 
 ### Forecast Diagram
 ![SkyCast Forecast](screenshots/forecast.png)
