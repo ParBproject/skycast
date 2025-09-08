@@ -13,7 +13,7 @@ It combines:
 ### Home Page
 ![SkyCast Home](SC/2.png)
 
-![SkyCast Forecast](SC/1.png2)
+![SkyCast Forecast](SC/2.png2)
 
 ### Forecast Diagram
 
