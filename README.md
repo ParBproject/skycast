@@ -11,14 +11,15 @@ It combines:
 ## 📸 Screenshots
 
 ### Home Page
-![SkyCast Home](SC/1.png)
+![SkyCast Home](SC/2.png)
 
-
-### Forecast Diagram
 ![SkyCast Forecast](SC/1.png2)
 
+### Forecast Diagram
+
+
 ### Daily Cards
-![SkyCast Cards](screenshots/cards.png)
+
 
 ---
 
