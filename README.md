@@ -11,17 +11,20 @@ It combines:
 ## 📸 Screenshots
 
 ### Home Page
-![SkyCast Home](SC/2.png)
-
-![SkyCast Forecast](SC/1.png)
-
+<p align="center">
+  <img src="SC/2.png" alt="Screenshot 1" width="400"><br>
+   
+<p align="center">
+  <img src="SC/1.png" alt="Screenshot 1" width="400"><br>
 
 ### Forecast Diagram
+<p align="center">
+  <img src="SC/4a.png" alt="Screenshot 1" width="400"><br>
 
-![SkyCast Forecast](SC/4a.png)
+   
 ### Daily Cards
-
-![SkyCast Forecast](SC/3a.png)
+<p align="center">
+  <img src="SC/3a.png" alt="Screenshot 1" width="400"><br>
 ---
 
 ---
