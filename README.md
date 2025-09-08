@@ -1,5 +1,7 @@
 # SkyCast – European Weather Viewer
 
+For the whole experience, visit project at:   https://parbproject.github.io/skycast/  
+
 SkyCast is a simple web project that shows a **7‑day weather forecast** for major European cities using the free [7Timer! API](https://www.7timer.info/).
 
 It combines:
