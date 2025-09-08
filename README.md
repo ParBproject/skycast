@@ -11,10 +11,11 @@ It combines:
 ## 📸 Screenshots
 
 ### Home Page
-![SkyCast Home](SC/Screenshot From 2025-09-07 20-09-03.png)
+![SkyCast Home](SC/1.png)
+
 
 ### Forecast Diagram
-![SkyCast Forecast](SC/Screenshot From 2025-09-07 16-55-20.png)
+![SkyCast Forecast](SC/1.png2)
 
 ### Daily Cards
 ![SkyCast Cards](screenshots/cards.png)
