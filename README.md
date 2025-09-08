@@ -14,7 +14,7 @@ It combines:
 ![SkyCast Home](SC/Screenshot From 2025-09-07 20-09-03.png)
 
 ### Forecast Diagram
-![SkyCast Forecast](screenshots/forecast.png)
+![SkyCast Forecast](SC/Screenshot From 2025-09-07 16-55-20.png)
 
 ### Daily Cards
 ![SkyCast Cards](screenshots/cards.png)
