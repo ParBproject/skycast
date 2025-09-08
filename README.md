@@ -6,7 +6,20 @@ It combines:
 - The **graphical forecast diagram (PNG)** from 7Timer!
 - **Daily forecast cards** with icons, summaries, and high/low temperatures.
 
-![SkyCast Screenshot](screenshot.png)
+---
+
+## 📸 Screenshots
+
+### Home Page
+![SkyCast Home](screenshots/home.png)
+
+### Forecast Diagram
+![SkyCast Forecast](screenshots/forecast.png)
+
+### Daily Cards
+![SkyCast Cards](screenshots/cards.png)
+
+---
 
 ---
 
