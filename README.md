@@ -13,14 +13,15 @@ It combines:
 ### Home Page
 ![SkyCast Home](SC/2.png)
 
-![SkyCast Forecast](SC/2.png2)
+![SkyCast Forecast](SC/1.png)
+
 
 ### Forecast Diagram
 
-
+![SkyCast Forecast](SC/4a.png)
 ### Daily Cards
 
-
+![SkyCast Forecast](SC/3a.png)
 ---
 
 ---
@@ -66,6 +67,7 @@ skycast/
 ---
 
 ## 🙌 Credits
+Par Bah
 - Weather data & diagrams: [7Timer!](https://www.7timer.info/)
 - Icons: custom flat weather set
 - Built with HTML, CSS, and JavaScript
