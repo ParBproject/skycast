@@ -1,82 +1,71 @@
-# SkyCast – European Weather Viewer
+# SkyCast — European Weather Viewer
 
-For the whole experience, visit project at:   https://parbproject.github.io/skycast/  
+[![HTML](https://img.shields.io/badge/HTML5-CSS3-JavaScript-E34F26?logo=html5&logoColor=white)](https://parbproject.github.io/skycast/)
+[![Live Demo](https://img.shields.io/badge/Live_Demo-GitHub_Pages-2ea44f)](https://parbproject.github.io/skycast/)
+[![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-SkyCast is a simple web project that shows a **7‑day weather forecast** for major European cities using the free [7Timer! API](https://www.7timer.info/).
+A responsive weather application that presents a seven-day forecast for major European cities using the public 7Timer! weather service. SkyCast combines forecast diagrams with readable daily cards so users can understand conditions quickly.
 
-It combines:
-- The **graphical forecast diagram (PNG)** from 7Timer!
-- **Daily forecast cards** with icons, summaries, and high/low temperatures.
+## Live Application
 
----
+**[Open SkyCast](https://parbproject.github.io/skycast/)**
 
-## 📸 Screenshots
+## Highlights
 
-### Home Page
+- Seven-day forecasts for major European cities
+- Daily high/low temperatures and condition summaries
+- Graphical forecast diagrams supplied by 7Timer!
+- Responsive browser-based interface
+- No API key, backend, or build process required
+
+## Preview
+
 <p align="center">
-  <img src="SC/2.png" alt="Screenshot 1" width="400"><br>
-   
+  <img src="SC/2.png" alt="SkyCast landing page" width="700">
+</p>
+
 <p align="center">
-  <img src="SC/1.png" alt="Screenshot 1" width="400"><br>
+  <img src="SC/4a.png" alt="European forecast diagram" width="700">
+</p>
 
-### Forecast Diagram
 <p align="center">
-  <img src="SC/4a.png" alt="Screenshot 1" width="400"><br>
+  <img src="SC/3a.png" alt="Daily weather forecast cards" width="700">
+</p>
 
-   
-### Daily Cards
-<p align="center">
-  <img src="SC/3a.png" alt="Screenshot 1" width="400"><br>
----
+## Technical Approach
 
----
+| Area | Implementation |
+|---|---|
+| Interface | HTML, CSS, JavaScript |
+| Weather data | 7Timer! public API |
+| Deployment | GitHub Pages |
+| Runtime | Client-side browser application |
 
-## 🚀 Live Demo
-Once published with GitHub Pages, your project will be live at:
-```
-https://<your-username>.github.io/skycast/
-```
+## Run Locally
 
----
+~~~bash
+git clone https://github.com/ParBproject/skycast.git
+cd skycast
+python -m http.server 8000
+~~~
 
-## 📂 Project Structure
-```
+Open http://localhost:8000 in a browser.
+
+## Project Structure
+
+~~~text
 skycast/
-├─ index.html        # main webpage
-├─ icons/            # weather icons (PNG/SVG)
-│  ├─ sun.png
-│  ├─ partly_cloudy.png
-│  ├─ rain.png
-│  └─ ...
-└─ screenshot.png    # optional screenshot for README
-```
+├── index.html
+├── european_weather_forecast.html
+├── SC/
+├── CONTRIBUTING.md
+└── LICENSE
+~~~
 
----
+## Skills Demonstrated
 
-## ⚙️ Setup (local)
-1. Clone or download this repo.
-2. Open the folder in **Visual Studio Code**.
-3. Install the **Live Server** extension.
-4. Right‑click `index.html` → **Open with Live Server**.
-5. The app will open at `http://127.0.0.1:5500/`.
+API integration, responsive UI development, asynchronous data handling, error-tolerant presentation, and static-site deployment.
 
----
+## Credits
 
-## 🌍 Deployment with GitHub Pages
-1. Push this project to a **public GitHub repo**.
-2. Go to **Settings → Pages**.
-3. Source: `Deploy from branch` → `main` branch → root folder.
-4. Save, then open the generated URL:  
-   `https://<your-username>.github.io/skycast/`
-
----
-
-## 🙌 Credits
-Par Bah
-- Weather data & diagrams: [7Timer!](https://www.7timer.info/)
-- Icons: custom flat weather set
-- Built with HTML, CSS, and JavaScript
-
----
-
-© 2025 SkyCast • Educational project
+Weather data and forecast diagrams are provided by [7Timer!](https://www.7timer.info/).
