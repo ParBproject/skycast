@@ -1,0 +1,9 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
+  <title id="title">Cloudy weather city illustration</title><desc id="desc">Layered soft clouds above a modern European skyline in cool blue-grey tones.</desc>
+  <defs><linearGradient id="sky" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#a9c7d8"/><stop offset=".48" stop-color="#6988a5"/><stop offset="1" stop-color="#253d57"/></linearGradient><filter id="soft"><feGaussianBlur stdDeviation="4"/></filter></defs>
+  <rect width="1200" height="760" fill="url(#sky)"/>
+  <g fill="#eef6fb" opacity=".78" filter="url(#soft)"><ellipse cx="210" cy="170" rx="150" ry="52"/><ellipse cx="330" cy="165" rx="115" ry="45"/><ellipse cx="600" cy="125" rx="205" ry="65"/><ellipse cx="810" cy="170" rx="170" ry="56"/><ellipse cx="1030" cy="130" rx="145" ry="47"/></g>
+  <path d="M0 535 160 455 270 510 395 420 520 505 660 450 780 520 925 430 1060 510 1200 465V760H0Z" fill="#304c68" opacity=".58"/>
+  <path d="M0 620 70 620 70 560 128 560 128 608 190 608 190 500 250 500 250 620 316 620 316 552 375 552 375 615 438 615 438 525 505 525 505 620 575 620 575 475 646 475 646 614 720 614 720 548 780 548 780 620 850 620 850 510 914 510 914 615 980 615 980 560 1045 560 1045 620 1110 620 1110 525 1175 525 1175 620 1200 620V760H0Z" fill="#11283d"/>
+  <rect y="620" width="1200" height="140" fill="#0b1e30" opacity=".55"/>
+</svg>
