@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
+  <title id="title">Clear weather city illustration</title><desc id="desc">A modern blue sky with warm sunlight above a European skyline.</desc>
+  <defs>
+    <linearGradient id="sky" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#78c8ff"/><stop offset=".5" stop-color="#2b7fdf"/><stop offset="1" stop-color="#11376f"/></linearGradient>
+    <linearGradient id="glow" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#fff3b0"/><stop offset="1" stop-color="#ffb35c" stop-opacity="0"/></linearGradient>
+    <filter id="blur"><feGaussianBlur stdDeviation="34"/></filter>
+  </defs>
+  <rect width="1200" height="760" fill="url(#sky)"/>
+  <circle cx="900" cy="170" r="118" fill="#ffd76e"/><circle cx="900" cy="170" r="180" fill="url(#glow)" filter="url(#blur)" opacity=".75"/>
+  <g fill="#fff" opacity=".7"><ellipse cx="220" cy="170" rx="120" ry="38"/><ellipse cx="315" cy="175" rx="82" ry="30"/></g>
+  <path d="M0 555 145 470 255 515 385 400 540 530 680 455 835 540 1000 445 1200 545V760H0Z" fill="#173d68" opacity=".72"/>
+  <path d="M0 620 85 604 85 525 140 525 140 590 195 590 195 480 245 480 245 600 310 600 310 542 355 542 355 606 418 606 418 505 468 505 468 614 532 614 532 550 590 550 590 595 645 595 645 468 705 468 705 610 770 610 770 530 820 530 820 594 885 594 885 500 945 500 945 608 1010 608 1010 558 1060 558 1060 612 1120 612 1120 520 1180 520 1180 620 1200 620V760H0Z" fill="#092344"/>
+  <rect y="620" width="1200" height="140" fill="#061a32" opacity=".55"/>
+  <g fill="#9dd8ff" opacity=".68"><rect x="105" y="548" width="12" height="18" rx="2"/><rect x="218" y="510" width="12" height="18" rx="2"/><rect x="672" y="495" width="12" height="18" rx="2"/><rect x="910" y="526" width="12" height="18" rx="2"/></g>
+</svg>

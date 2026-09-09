@@ -1,0 +1,10 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
+  <title id="title">Rain weather city illustration</title><desc id="desc">A moody European skyline under rain clouds with cool reflections.</desc>
+  <defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#364f73"/><stop offset=".55" stop-color="#162941"/><stop offset="1" stop-color="#081725"/></linearGradient><linearGradient id="wet" x1="0" y1="0" x2="1" y2="0"><stop stop-color="#0d345d"/><stop offset=".5" stop-color="#1d6aa6"/><stop offset="1" stop-color="#0c243c"/></linearGradient></defs>
+  <rect width="1200" height="760" fill="url(#sky)"/>
+  <g fill="#afc6dc" opacity=".56"><ellipse cx="270" cy="150" rx="190" ry="58"/><ellipse cx="470" cy="155" rx="170" ry="52"/><ellipse cx="820" cy="125" rx="230" ry="70"/><ellipse cx="1010" cy="155" rx="165" ry="54"/></g>
+  <g stroke="#8dd1ff" stroke-width="6" stroke-linecap="round" opacity=".46"><path d="M100 250l-28 70"/><path d="M235 235l-28 70"/><path d="M390 260l-28 70"/><path d="M555 230l-28 70"/><path d="M720 250l-28 70"/><path d="M885 225l-28 70"/><path d="M1040 260l-28 70"/><path d="M1145 225l-28 70"/></g>
+  <path d="M0 610 75 610 75 525 130 525 130 598 196 598 196 472 255 472 255 608 325 608 325 548 376 548 376 604 430 604 430 510 494 510 494 610 560 610 560 452 630 452 630 604 700 604 700 534 760 534 760 610 830 610 830 495 895 495 895 608 960 608 960 545 1025 545 1025 610 1090 610 1090 505 1160 505 1160 612 1200 612V760H0Z" fill="#07131f"/>
+  <rect y="610" width="1200" height="150" fill="url(#wet)" opacity=".72"/>
+  <g stroke="#62bfff" stroke-width="3" opacity=".38"><path d="M80 660h210"/><path d="M365 705h250"/><path d="M760 650h290"/><path d="M930 720h190"/></g>
+</svg>

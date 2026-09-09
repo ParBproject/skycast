@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 760" role="img" aria-labelledby="title desc">
+  <title id="title">Snow weather alpine illustration</title><desc id="desc">A crisp winter European landscape with snow-covered peaks and a dark foreground city.</desc>
+  <defs><linearGradient id="sky" x1="0" y1="0" x2="0" y2="1"><stop stop-color="#bfe8ff"/><stop offset=".55" stop-color="#6aa8d3"/><stop offset="1" stop-color="#294f73"/></linearGradient></defs>
+  <rect width="1200" height="760" fill="url(#sky)"/>
+  <circle cx="955" cy="150" r="78" fill="#eefbff" opacity=".72"/>
+  <path d="M0 565 160 405 260 505 405 325 555 515 710 370 820 500 980 300 1200 520V760H0Z" fill="#537da0"/>
+  <path d="M120 445 160 405l44 62-33-17-22 16Zm235-62 50-58 58 92-49-28-28 25Zm315 32 40-45 50 76-39-22-29 18Zm250-58 60-57 69 110-53-31-33 27Z" fill="#f4fbff"/>
+  <g fill="#edf8ff" opacity=".85"><circle cx="120" cy="180" r="7"/><circle cx="230" cy="240" r="6"/><circle cx="390" cy="175" r="8"/><circle cx="570" cy="225" r="6"/><circle cx="730" cy="170" r="7"/><circle cx="860" cy="250" r="6"/><circle cx="1040" cy="220" r="7"/><circle cx="1120" cy="160" r="5"/></g>
+  <path d="M0 625 70 625 70 560 128 560 128 614 190 614 190 520 250 520 250 625 320 625 320 575 375 575 375 620 438 620 438 545 505 545 505 625 570 625 570 505 640 505 640 620 710 620 710 565 770 565 770 625 840 625 840 535 905 535 905 620 980 620 980 570 1040 570 1040 625 1110 625 1110 540 1175 540 1175 625 1200 625V760H0Z" fill="#102a3e"/>
+  <rect y="625" width="1200" height="135" fill="#e9f7ff" opacity=".22"/>
+</svg>
