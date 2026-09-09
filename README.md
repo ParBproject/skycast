@@ -4,42 +4,51 @@
 [![Live Demo](https://img.shields.io/badge/Live_Demo-GitHub_Pages-2ea44f)](https://parbproject.github.io/skycast/)
 [![License](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
 
-SkyCast is a responsive, client-side weather dashboard for major European cities. It turns public 7Timer! forecast data into a cleaner product experience with daily summaries, temperature trends, forecast metrics, condition-aware artwork, and fast weekly insights.
-
-## Live Application
-
-**[Open SkyCast](https://parbproject.github.io/skycast/)**
-
-## Dashboard Preview
-
 <p align="center">
-  <img src="SC/skycast-dashboard-2026.svg" alt="SkyCast redesigned European weather dashboard" width="900">
+  <a href="https://parbproject.github.io/skycast/">
+    <img src="SC/skycast-dashboard-2026.svg" alt="SkyCast redesigned European weather dashboard" width="1000">
+  </a>
 </p>
 
 <p align="center">
-  <img src="SC/skycast-forecast-2026.svg" alt="SkyCast seven-day forecast and temperature trend" width="900">
+  <strong>A modern, responsive weather dashboard for major European cities.</strong><br>
+  Live forecast aggregation • Native SVG visualization • Condition-aware artwork • No API key required
 </p>
 
-## What Changed
+<p align="center">
+  <a href="https://parbproject.github.io/skycast/"><strong>Open Live Dashboard →</strong></a>
+</p>
 
-- Rebuilt the page as a professional data dashboard instead of centering the legacy 7Timer PNG diagram
-- Added condition-aware hero artwork for clear, cloudy, rainy, and snowy forecasts
-- Added a native seven-day temperature trend visualization generated in JavaScript
-- Added current forecast summary, humidity, wind-level, daily high/low, and weekly insights
-- Replaced external/missing weather icon dependencies with an integrated condition presentation
-- Added loading states, clearer API failure handling, persistent city/unit preferences, and improved mobile layouts
-- Replaced outdated repository screenshots with current 2026 dashboard previews
+SkyCast turns public 7Timer! forecast data into a polished data-product experience with seven-day summaries, temperature trends, forecast metrics, condition-aware visuals, persistent preferences, and responsive layouts.
 
-## Core Features
+## Product Highlights
 
 - Seven-day forecasts for 22 major European cities
 - Metric and imperial temperature switching
-- Dominant daily weather condition summaries
-- Temperature high/low trend chart
-- Condition-aware dashboard artwork
-- Weather metrics and weekly insight cards
-- Responsive desktop, tablet, and mobile interface
-- Client-side API integration with no key or backend required
+- Native temperature high/low trend chart rendered from forecast data
+- Current-condition summary with humidity, wind, daily range, and dominant conditions
+- Dynamic hero artwork that changes for clear, cloudy, rainy, and snowy forecasts
+- Weekly insight cards derived from the forecast instead of static copy
+- Loading states, API failure handling, and persistent city/unit preferences
+- Responsive desktop, tablet, and mobile dashboard
+- Fully client-side deployment with no framework, backend, or API key
+
+## Forecast Experience
+
+<p align="center">
+  <img src="SC/skycast-forecast-2026.svg" alt="SkyCast seven-day forecast cards and temperature trend" width="1000">
+</p>
+
+## What Was Modernized
+
+The original version centered a legacy 7Timer-generated PNG diagram and relied on outdated screenshots. The current dashboard replaces that presentation with native UI components and local visual assets so the live forecast itself drives the interface.
+
+- Replaced the image-first forecast layout with a structured dashboard
+- Replaced outdated screenshots with current 2026 repository previews
+- Added local SVG scene assets instead of missing/external icon dependencies
+- Added native data visualization generated in JavaScript
+- Improved hierarchy, spacing, cards, controls, responsive behavior, and accessibility states
+- Retained the lightweight static-site architecture and public weather API integration
 
 ## Technical Approach
 
@@ -47,11 +56,12 @@ SkyCast is a responsive, client-side weather dashboard for major European cities
 |---|---|
 | Interface | Semantic HTML, responsive CSS, vanilla JavaScript |
 | Weather data | 7Timer! public civil forecast API |
-| Visualization | Native SVG chart generated from aggregated forecast data |
+| Aggregation | Client-side grouping of forecast timepoints into daily summaries |
+| Visualization | Native SVG temperature chart generated from forecast data |
 | Visual system | Lightweight local SVG weather scenes |
 | State | `localStorage` for selected city and temperature unit |
 | Deployment | GitHub Pages |
-| Runtime | Fully client-side; no framework or build process |
+| Runtime | Fully client-side; no build process required |
 
 ## Project Structure
 
@@ -83,8 +93,8 @@ Open `http://localhost:8000` in a browser.
 
 ## Skills Demonstrated
 
-API integration, asynchronous JavaScript, data aggregation, SVG data visualization, responsive product UI, local-state persistence, graceful error handling, and static-site deployment.
+API integration, asynchronous JavaScript, forecast-data aggregation, SVG data visualization, responsive product UI, local-state persistence, graceful error handling, and static-site deployment.
 
 ## Credits
 
-Weather data is provided by [7Timer!](https://www.7timer.info/). The dashboard interface and visual assets are maintained in this repository.
+Weather data is provided by [7Timer!](https://www.7timer.info/). Dashboard interface, data visualization, and visual assets are maintained in this repository.
