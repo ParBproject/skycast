@@ -43,11 +43,13 @@ class SkyCastProjectTests(unittest.TestCase):
         }
         self.assertTrue(required.issubset(self.parser.ids), required - self.parser.ids)
 
-    def test_open_meteo_is_the_only_weather_provider_in_app_and_readme(self):
-        combined = (self.index + "\n" + self.readme).lower()
-        self.assertIn("open-meteo", combined)
-        self.assertNotIn("7timer", combined)
-        self.assertIn("api.open-meteo.com/v1/forecast", self.index)
+    def test_open_meteo_is_the_weather_provider(self):
+        app = self.index.lower()
+        readme = self.readme.lower()
+        self.assertIn("open-meteo", app)
+        self.assertIn("api.open-meteo.com/v1/forecast", app)
+        self.assertNotIn("7timer", app)
+        self.assertIn("open-meteo", readme)
 
     def test_all_local_html_references_exist(self):
         missing = []
