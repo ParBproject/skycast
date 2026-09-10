@@ -1,7 +1,7 @@
 {
-  "name": "SkyCast — European Weather Intelligence",
+  "name": "SkyCast — Weather Intelligence",
   "short_name": "SkyCast",
-  "description": "Live current conditions, hourly outlooks, and seven-day weather intelligence for major European cities.",
+  "description": "Search locations worldwide for live current conditions, hourly outlooks, seven-day forecasts, favorites, and offline last-known weather.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
