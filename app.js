@@ -15,39 +15,63 @@ const {
   deriveInsights,
 } = SkyCastCore;
 
-const CITIES = [
-  {name:"Amsterdam, Netherlands",lat:52.3676,lon:4.9041},{name:"Athens, Greece",lat:37.9838,lon:23.7275},
-  {name:"Barcelona, Spain",lat:41.3874,lon:2.1686},{name:"Berlin, Germany",lat:52.52,lon:13.405},
-  {name:"Budapest, Hungary",lat:47.4979,lon:19.0402},{name:"Copenhagen, Denmark",lat:55.6761,lon:12.5683},
-  {name:"Dublin, Ireland",lat:53.3498,lon:-6.2603},{name:"Edinburgh, UK",lat:55.9533,lon:-3.1883},
-  {name:"Helsinki, Finland",lat:60.1699,lon:24.9384},{name:"Lisbon, Portugal",lat:38.7223,lon:-9.1393},
-  {name:"London, UK",lat:51.5074,lon:-0.1278},{name:"Madrid, Spain",lat:40.4168,lon:-3.7038},
-  {name:"Oslo, Norway",lat:59.9139,lon:10.7522},{name:"Paris, France",lat:48.8566,lon:2.3522},
-  {name:"Prague, Czechia",lat:50.0755,lon:14.4378},{name:"Reykjavík, Iceland",lat:64.1466,lon:-21.9426},
-  {name:"Rome, Italy",lat:41.9028,lon:12.4964},{name:"Stockholm, Sweden",lat:59.3293,lon:18.0686},
-  {name:"Tallinn, Estonia",lat:59.437,lon:24.7536},{name:"Vienna, Austria",lat:48.2082,lon:16.3738},
-  {name:"Warsaw, Poland",lat:52.2297,lon:21.0122},{name:"Zurich, Switzerland",lat:47.3769,lon:8.5417}
-];
+const {
+  DEFAULT_CITIES,
+  sanitizeLocation,
+  locationKey,
+  sameLocation,
+  buildGeocodingURL,
+  normalizeGeocodingResults,
+  trimFavorites,
+  toggleFavorite,
+  buildShareQuery,
+  parseShareQuery,
+} = SkyCastLocations;
 
 const els = Object.fromEntries([
-  "city","unitC","unitF","refreshBtn","installBtn","status","connectionPill","connectionLabel","forecastGrid","hourlyGrid","chart","insights","heroArtwork","currentCondition","currentTemp","currentCity","forecastTime","lastUpdated","timezoneLabel","cacheLabel","feelsMetric","humidityMetric","windMetric","windDetail","cloudMetric","rainMetric","sunsetMetric","sunriseDetail"
+  "city","unitC","unitF","refreshBtn","installBtn","shareBtn","status","connectionPill","connectionLabel","forecastGrid","hourlyGrid","chart","insights","heroArtwork","currentCondition","currentTemp","currentCity","forecastTime","lastUpdated","timezoneLabel","cacheLabel","feelsMetric","humidityMetric","windMetric","windDetail","cloudMetric","rainMetric","sunsetMetric","sunriseDetail","locationSearchForm","locationQuery","locationSearchBtn","locationResults","geoBtn","favoriteBtn","favoritesRow"
 ].map(id => [id, document.getElementById(id)]));
 
-let unit = localStorage.getItem("skycastUnit") || "celsius";
-if (!['celsius','fahrenheit'].includes(unit)) unit = 'celsius';
+function readJSON(key,fallback) {
+  try {
+    const value = JSON.parse(localStorage.getItem(key));
+    return value ?? fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+const sharedState = parseShareQuery(window.location.search);
+let unit = sharedState?.unit || localStorage.getItem("skycastUnit") || "celsius";
+if (!["celsius","fahrenheit"].includes(unit)) unit = "celsius";
+
+const legacySavedCity = Number(localStorage.getItem("skycastCity"));
+const savedLocation = sanitizeLocation(readJSON("skycastLocation",null));
+let activeLocation = sharedState?.location || savedLocation || DEFAULT_CITIES[Number.isInteger(legacySavedCity) && legacySavedCity >= 0 && legacySavedCity < DEFAULT_CITIES.length ? legacySavedCity : 10];
+let favorites = trimFavorites(readJSON("skycastFavorites",[]));
 let activeController = null;
+let searchController = null;
 let loadSequence = 0;
 let deferredInstallPrompt = null;
+
 document.getElementById("year").textContent = new Date().getFullYear();
 
-CITIES.forEach((city,index) => {
-  const option = document.createElement("option");
-  option.value = index;
-  option.textContent = city.name;
-  els.city.appendChild(option);
-});
-const savedCity = Number(localStorage.getItem("skycastCity"));
-els.city.value = Number.isInteger(savedCity) && savedCity >= 0 && savedCity < CITIES.length ? String(savedCity) : "10";
+function allSelectableLocations() {
+  const locations = DEFAULT_CITIES.slice();
+  if (!locations.some(location=>sameLocation(location,activeLocation))) locations.push(activeLocation);
+  return locations;
+}
+
+function renderLocationOptions() {
+  els.city.replaceChildren();
+  for (const location of allSelectableLocations()) {
+    const option = document.createElement("option");
+    option.value = locationKey(location);
+    option.textContent = location.name;
+    els.city.appendChild(option);
+  }
+  els.city.value = locationKey(activeLocation);
+}
 
 function syncUnitButtons() {
   const c = unit === "celsius";
@@ -70,17 +94,75 @@ function setConnectionState(mode) {
   els.connectionLabel.textContent = mode === "cached" ? "Cached forecast" : mode === "offline" ? "Offline" : "Live forecast";
 }
 
-function saveCachedForecast(city,data) {
+function persistActiveLocation() {
   try {
-    localStorage.setItem(cacheKey(city,unit),JSON.stringify({savedAt:Date.now(),data}));
+    localStorage.setItem("skycastLocation",JSON.stringify(activeLocation));
+    const presetIndex = DEFAULT_CITIES.findIndex(location=>sameLocation(location,activeLocation));
+    if (presetIndex >= 0) localStorage.setItem("skycastCity",String(presetIndex));
+  } catch (error) {
+    console.warn("SkyCast location preference write skipped",error);
+  }
+}
+
+function updateShareURL() {
+  try {
+    const next = `${window.location.pathname}${buildShareQuery(activeLocation,unit)}${window.location.hash}`;
+    window.history.replaceState(null,"",next);
+  } catch (error) {
+    console.warn("SkyCast URL state update skipped",error);
+  }
+}
+
+function renderFavorites() {
+  els.favoritesRow.replaceChildren();
+  els.favoritesRow.hidden = favorites.length === 0;
+  if (!favorites.length) return;
+
+  const label = document.createElement("span");
+  label.className = "favorites-label";
+  label.textContent = "Favorites";
+  els.favoritesRow.appendChild(label);
+
+  for (const location of favorites) {
+    const button = document.createElement("button");
+    button.type = "button";
+    button.className = "favorite-chip";
+    button.textContent = location.name;
+    button.addEventListener("click",()=>setActiveLocation(location));
+    els.favoritesRow.appendChild(button);
+  }
+}
+
+function syncFavoriteButton() {
+  const saved = favorites.some(location=>sameLocation(location,activeLocation));
+  els.favoriteBtn.classList.toggle("favorite-active",saved);
+  els.favoriteBtn.setAttribute("aria-pressed",String(saved));
+  els.favoriteBtn.textContent = saved ? "★ Saved" : "☆ Save";
+}
+
+function setActiveLocation(location,{persist=true,refresh=true}={}) {
+  const clean = sanitizeLocation(location);
+  if (!clean) return false;
+  activeLocation = clean;
+  renderLocationOptions();
+  syncFavoriteButton();
+  if (persist) persistActiveLocation();
+  updateShareURL();
+  if (refresh) loadForecast();
+  return true;
+}
+
+function saveCachedForecast(location,data) {
+  try {
+    localStorage.setItem(cacheKey(location,unit),JSON.stringify({savedAt:Date.now(),data}));
   } catch (error) {
     console.warn("SkyCast cache write skipped",error);
   }
 }
 
-function readCachedForecast(city) {
+function readCachedForecast(location) {
   try {
-    const key = cacheKey(city,unit);
+    const key = cacheKey(location,unit);
     const raw = localStorage.getItem(key);
     if (!raw) return null;
     const cached = JSON.parse(raw);
@@ -95,15 +177,15 @@ function readCachedForecast(city) {
   }
 }
 
-function renderHero(city,data) {
+function renderHero(location,data) {
   const [label,,theme] = weatherForCode(data.current.weather_code);
   els.currentCondition.textContent = label;
   els.currentTemp.textContent = formatTemp(data.current.temperature_2m);
-  els.currentCity.textContent = city.name;
+  els.currentCity.textContent = location.name;
   const localTime = String(data.current.time || "").slice(11,16);
   els.forecastTime.textContent = `${localTime || "—"}${data.timezoneAbbr ? ` ${data.timezoneAbbr}` : ""}`;
   els.heroArtwork.src = `assets/hero-${theme}.svg`;
-  els.heroArtwork.alt = `${label} themed European weather illustration`;
+  els.heroArtwork.alt = `${label} themed weather illustration`;
 }
 
 function renderMetrics(data) {
@@ -181,8 +263,8 @@ function renderInsights(days) {
   els.insights.innerHTML = rows.map(([icon,title,copy])=>`<div class="insight"><div class="insight-icon" aria-hidden="true">${icon}</div><div><strong>${title}</strong><span>${copy}</span></div></div>`).join("");
 }
 
-function renderData(city,data,{cached=false,savedAt=null}={}) {
-  renderHero(city,data);
+function renderData(location,data,{cached=false,savedAt=null}={}) {
+  renderHero(location,data);
   renderMetrics(data);
   renderHourly(data.hours || []);
   renderForecast(data.days);
@@ -206,15 +288,15 @@ function renderLoading() {
   els.chart.innerHTML = `<div class="skeleton" style="position:absolute;inset:18px"></div>`;
 }
 
-function showCachedOrUnavailable(city,message) {
-  const cached = readCachedForecast(city);
+function showCachedOrUnavailable(location,message) {
+  const cached = readCachedForecast(location);
   if (cached) {
-    renderData(city,cached.data,{cached:true,savedAt:cached.savedAt});
+    renderData(location,cached.data,{cached:true,savedAt:cached.savedAt});
     showStatus(`${message} Showing the last successful forecast from ${ageLabel(cached.savedAt)}.`,false,true);
     return true;
   }
   setConnectionState("offline");
-  showStatus(`${message} No recent cached forecast is available for this city and unit.`,true);
+  showStatus(`${message} No recent cached forecast is available for this location and unit.`,true);
   els.hourlyGrid.innerHTML = `<div style="color:#8fa4bb;padding:18px 0">Hourly data is unavailable offline.</div>`;
   els.forecastGrid.innerHTML = `<div style="grid-column:1/-1;color:#8fa4bb;padding:22px 0">Live forecast cards are temporarily unavailable.</div>`;
   els.chart.innerHTML = "";
@@ -226,42 +308,175 @@ async function loadForecast() {
   const sequence = ++loadSequence;
   if (activeController) activeController.abort();
   activeController = new AbortController();
-  const city = CITIES[Number(els.city.value)];
+  const location = activeLocation;
 
   if (!navigator.onLine) {
     els.refreshBtn.disabled = false;
-    showCachedOrUnavailable(city,"SkyCast is offline.");
+    showCachedOrUnavailable(location,"SkyCast is offline.");
     return;
   }
 
-  showStatus(`Updating live forecast for ${city.name}…`);
+  showStatus(`Updating live forecast for ${location.name}…`);
   renderLoading();
   els.refreshBtn.disabled = true;
   try {
-    const response = await fetch(buildForecastURL(city,unit),{cache:"no-store",signal:activeController.signal});
+    const response = await fetch(buildForecastURL(location,unit),{cache:"no-store",signal:activeController.signal});
     if (!response.ok) throw new Error(`Weather service returned ${response.status}`);
     const api = await response.json();
     if (sequence !== loadSequence) return;
     const data = normalizeForecast(api);
-    saveCachedForecast(city,data);
-    renderData(city,data);
+    saveCachedForecast(location,data);
+    renderData(location,data);
     showStatus("");
   } catch (error) {
     if (error.name === "AbortError") return;
     console.error(error);
-    showCachedOrUnavailable(city,"SkyCast could not reach the live weather service.");
+    showCachedOrUnavailable(location,"SkyCast could not reach the live weather service.");
   } finally {
     if (sequence === loadSequence) els.refreshBtn.disabled = false;
   }
 }
 
-els.city.addEventListener("change",()=>{ localStorage.setItem("skycastCity",els.city.value); loadForecast(); });
-els.unitC.addEventListener("click",()=>{ unit="celsius"; localStorage.setItem("skycastUnit",unit); syncUnitButtons(); loadForecast(); });
-els.unitF.addEventListener("click",()=>{ unit="fahrenheit"; localStorage.setItem("skycastUnit",unit); syncUnitButtons(); loadForecast(); });
+function hideLocationResults() {
+  els.locationResults.hidden = true;
+  els.locationResults.replaceChildren();
+}
+
+function renderLocationResults(results) {
+  els.locationResults.replaceChildren();
+  if (!results.length) {
+    const empty = document.createElement("div");
+    empty.className = "location-empty";
+    empty.textContent = "No matching locations found. Try a city plus country or a postal code.";
+    els.locationResults.appendChild(empty);
+  } else {
+    for (const result of results) {
+      const button = document.createElement("button");
+      button.type = "button";
+      button.className = "location-result";
+      button.setAttribute("role","option");
+      const title = document.createElement("strong");
+      title.textContent = result.name;
+      const meta = document.createElement("span");
+      meta.textContent = [result.timezone,result.countryCode].filter(Boolean).join(" • ");
+      button.append(title,meta);
+      button.addEventListener("click",()=>{
+        hideLocationResults();
+        els.locationQuery.value = "";
+        setActiveLocation(result);
+      });
+      els.locationResults.appendChild(button);
+    }
+  }
+  els.locationResults.hidden = false;
+}
+
+async function searchLocations(event) {
+  event.preventDefault();
+  const query = els.locationQuery.value.trim();
+  if (query.length < 2) {
+    showStatus("Enter at least two characters to search for a location.",true);
+    els.locationQuery.focus();
+    return;
+  }
+  if (!navigator.onLine) {
+    showStatus("Location search requires a network connection.",true);
+    return;
+  }
+  if (searchController) searchController.abort();
+  searchController = new AbortController();
+  els.locationSearchBtn.disabled = true;
+  els.locationSearchBtn.textContent = "Searching…";
+  try {
+    const response = await fetch(buildGeocodingURL(query,8),{cache:"no-store",signal:searchController.signal});
+    if (!response.ok) throw new Error(`Location service returned ${response.status}`);
+    const results = normalizeGeocodingResults(await response.json());
+    renderLocationResults(results);
+    showStatus("");
+  } catch (error) {
+    if (error.name === "AbortError") return;
+    console.error(error);
+    hideLocationResults();
+    showStatus("SkyCast could not search locations right now.",true);
+  } finally {
+    els.locationSearchBtn.disabled = false;
+    els.locationSearchBtn.textContent = "Search";
+  }
+}
+
+function useCurrentLocation() {
+  if (!navigator.geolocation) {
+    showStatus("This browser does not provide location access.",true);
+    return;
+  }
+  els.geoBtn.disabled = true;
+  els.geoBtn.textContent = "Locating…";
+  showStatus("Requesting your current location…");
+  navigator.geolocation.getCurrentPosition(
+    position=>{
+      els.geoBtn.disabled = false;
+      els.geoBtn.textContent = "⌖ Use my location";
+      setActiveLocation({name:"My location",lat:position.coords.latitude,lon:position.coords.longitude});
+      showStatus("");
+    },
+    error=>{
+      els.geoBtn.disabled = false;
+      els.geoBtn.textContent = "⌖ Use my location";
+      const message = error.code === 1 ? "Location permission was not granted." : "SkyCast could not determine your current location.";
+      showStatus(message,true);
+    },
+    {enableHighAccuracy:false,timeout:10000,maximumAge:10*60*1000}
+  );
+}
+
+async function shareCurrentForecast() {
+  updateShareURL();
+  const shareData = {title:`SkyCast — ${activeLocation.name}`,text:`Weather forecast for ${activeLocation.name}`,url:window.location.href};
+  try {
+    if (navigator.share) {
+      await navigator.share(shareData);
+      return;
+    }
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(shareData.url);
+      showStatus("Share link copied to your clipboard.");
+      return;
+    }
+    showStatus("The forecast URL is ready to copy from your browser address bar.");
+  } catch (error) {
+    if (error.name !== "AbortError") showStatus("SkyCast could not share this forecast.",true);
+  }
+}
+
+els.city.addEventListener("change",()=>{
+  const selected = allSelectableLocations().find(location=>locationKey(location) === els.city.value);
+  if (selected) setActiveLocation(selected);
+});
+els.unitC.addEventListener("click",()=>{ unit="celsius"; localStorage.setItem("skycastUnit",unit); syncUnitButtons(); updateShareURL(); loadForecast(); });
+els.unitF.addEventListener("click",()=>{ unit="fahrenheit"; localStorage.setItem("skycastUnit",unit); syncUnitButtons(); updateShareURL(); loadForecast(); });
 els.refreshBtn.addEventListener("click",loadForecast);
+els.locationSearchForm.addEventListener("submit",searchLocations);
+els.geoBtn.addEventListener("click",useCurrentLocation);
+els.favoriteBtn.addEventListener("click",()=>{
+  favorites = toggleFavorite(favorites,activeLocation);
+  try { localStorage.setItem("skycastFavorites",JSON.stringify(favorites)); } catch (error) { console.warn("SkyCast favorites write skipped",error); }
+  renderFavorites();
+  syncFavoriteButton();
+});
+els.shareBtn.addEventListener("click",shareCurrentForecast);
+els.locationQuery.addEventListener("keydown",event=>{ if (event.key === "Escape") hideLocationResults(); });
+document.addEventListener("pointerdown",event=>{ if (!els.locationSearchForm.contains(event.target)) hideLocationResults(); });
 
 window.addEventListener("online",()=>{ setConnectionState("live"); loadForecast(); });
-window.addEventListener("offline",()=>{ const city = CITIES[Number(els.city.value)]; showCachedOrUnavailable(city,"Network connection lost."); });
+window.addEventListener("offline",()=>showCachedOrUnavailable(activeLocation,"Network connection lost."));
+window.addEventListener("popstate",()=>{
+  const state = parseShareQuery(window.location.search);
+  if (!state) return;
+  unit = state.unit;
+  localStorage.setItem("skycastUnit",unit);
+  syncUnitButtons();
+  setActiveLocation(state.location,{persist:true,refresh:true});
+});
 window.addEventListener("beforeinstallprompt",event => { event.preventDefault(); deferredInstallPrompt = event; els.installBtn.hidden = false; });
 els.installBtn.addEventListener("click",async() => {
   if (!deferredInstallPrompt) return;
@@ -276,6 +491,11 @@ if ("serviceWorker" in navigator) {
   window.addEventListener("load",()=>navigator.serviceWorker.register("./sw.js").catch(error=>console.warn("Service worker registration failed",error)));
 }
 
+renderLocationOptions();
+renderFavorites();
+syncFavoriteButton();
 syncUnitButtons();
+persistActiveLocation();
+updateShareURL();
 setConnectionState(navigator.onLine ? "live" : "offline");
 loadForecast();
