@@ -1,7 +1,7 @@
 {
   "name": "SkyCast — Weather Intelligence",
   "short_name": "SkyCast",
-  "description": "Search locations worldwide for live current conditions, hourly outlooks, seven-day forecasts, favorites, and offline last-known weather.",
+  "description": "Search locations worldwide for live weather, air quality, UV, pollen, hourly outlooks, seven-day forecasts, favorites, and offline last-known data.",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",
