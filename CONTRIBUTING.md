@@ -2,7 +2,7 @@
 
 Thanks for contributing to SkyCast.
 
-SkyCast is intentionally lightweight: the production dashboard lives in `index.html`, live weather data comes from Open-Meteo, forecast visuals are generated client-side, the installable application shell is managed by `manifest.webmanifest` and `sw.js`, and reusable artwork lives in `assets/`.
+SkyCast is intentionally lightweight but now separates responsibilities across a small modular frontend: `index.html` contains semantic markup, `styles.css` owns presentation, `app.js` controls browser behavior and rendering, and `src/forecast-core.js` contains reusable weather-domain logic. PWA behavior lives in `manifest.webmanifest` and `sw.js`.
 
 ## Development workflow
 
@@ -10,22 +10,19 @@ SkyCast is intentionally lightweight: the production dashboard lives in `index.h
 2. Create a focused branch, for example `git checkout -b feature/forecast-improvement`.
 3. Run the site locally with `python -m http.server 8000`.
 4. Run `python -m unittest discover -s tests -v`.
-5. Test desktop and mobile layouts before committing.
-6. When changing caching/PWA behavior, test once online and once after switching the browser offline.
-7. Commit your changes with a clear engineering-focused message.
-8. Push the branch and open a pull request.
+5. Run `node tests/forecast-core.test.js`.
+6. Test desktop and mobile layouts before committing.
+7. When changing caching/PWA behavior, test once online and once after switching the browser offline.
+8. Commit with a clear engineering-focused message and open a pull request.
 
-## Project conventions
+## Module boundaries
 
-- Keep the app dependency-free unless a new dependency materially improves the product.
-- Keep production HTML, CSS, and JavaScript in `index.html` unless the project grows enough to justify a build system.
-- Put reusable weather artwork in `assets/` as optimized SVG where practical.
-- Put README showcase images in `SC/` and keep them representative of the current interface.
-- Use Open-Meteo/WMO weather codes as the canonical weather condition model.
-- Preserve request cancellation and stale-response protection when changing data fetching.
-- Preserve graceful API-error states, cached-data fallback, and responsive behavior.
-- Prefer accessible labels, semantic markup, keyboard-friendly controls, and reduced-motion support.
-- Update the regression suite whenever a structural requirement changes intentionally.
+- Keep semantic structure in `index.html`; do not move application logic back into inline scripts.
+- Keep visual rules in `styles.css`; avoid rebuilding a large inline `<style>` block.
+- Put DOM rendering, browser events, request lifecycle, and localStorage interaction in `app.js`.
+- Put pure forecast logic in `src/forecast-core.js` whenever it can run without the DOM. This includes API URL construction, payload normalization, WMO mapping, cache-age logic, formatting helpers, and derived forecast insights.
+- Add or update `tests/forecast-core.test.js` whenever core behavior changes.
+- Keep the app dependency-free unless a dependency materially improves the product and is justified in the PR.
 
 ## Data and visualization changes
 
@@ -45,14 +42,15 @@ When changing weather normalization, derived metrics, hourly cards, or charts:
 When modifying the application shell:
 
 - Keep `manifest.webmanifest`, `sw.js`, and `assets/app-icon.svg` aligned with the live product.
-- Increment `CACHE_VERSION` in `sw.js` when shell assets change in a way that requires clients to refresh cached files.
+- Increment `CACHE_VERSION` in `sw.js` whenever shell assets change in a way that requires clients to refresh cached files.
+- If a new production CSS/JS asset is required to boot the app, add it to `APP_SHELL`.
 - Cache only same-origin static GET requests in the service worker unless a deliberate data-caching design is reviewed separately.
-- Keep live weather freshness explicit. The current design stores normalized forecast data in `localStorage` with a 24-hour TTL and labels it as cached when used.
+- Keep live weather freshness explicit. Forecast fallback data uses a 24-hour TTL and must be labeled as cached when rendered.
 - Verify the dashboard still loads after the service worker has cached the shell and the network is disabled.
 
 ## Quality checks
 
-The GitHub Actions workflow runs the same standard-library regression suite used locally. New changes should keep these checks green and should not introduce missing local assets, stale provider references, invalid manifest entries, or broken service-worker shell paths.
+GitHub Actions runs Python structural/PWA regression tests, JavaScript syntax checks, and Node behavioral tests for the forecast core. New changes should keep all of them green.
 
 ## Reporting issues
 
