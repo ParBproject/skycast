@@ -4,11 +4,8 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#07111f">
-  <meta name="description" content="SkyCast is a modern seven-day European weather dashboard powered by 7Timer! data.">
+  <meta name="description" content="SkyCast is a modern seven-day European weather dashboard powered by Open-Meteo live forecast data.">
   <title>SkyCast — European Weather Dashboard</title>
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Manrope:wght@600;700;800&display=swap" rel="stylesheet">
   <style>
     :root {
       color-scheme: dark;
@@ -16,7 +13,7 @@
       --surface: #0b1726;
       --surface-2: #101f31;
       --surface-3: #14283e;
-      --border: rgba(160, 190, 220, .14);
+      --border: rgba(160,190,220,.14);
       --text: #f5f9ff;
       --muted: #8fa4bb;
       --blue: #63b6ff;
@@ -24,7 +21,8 @@
       --cyan: #68e0df;
       --warm: #ffd178;
       --danger: #ff9f9f;
-      --shadow: 0 22px 70px rgba(0, 0, 0, .34);
+      --success: #75e6b0;
+      --shadow: 0 22px 70px rgba(0,0,0,.34);
       --radius-xl: 28px;
       --radius-lg: 20px;
       --radius-md: 15px;
@@ -35,485 +33,365 @@
     body {
       margin: 0;
       min-height: 100vh;
-      font-family: Inter, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       color: var(--text);
       background:
-        radial-gradient(circle at 82% 0%, rgba(42, 127, 205, .20), transparent 30rem),
-        radial-gradient(circle at 0% 30%, rgba(29, 92, 150, .12), transparent 26rem),
+        radial-gradient(circle at 82% 0%, rgba(42,127,205,.20), transparent 30rem),
+        radial-gradient(circle at 0% 30%, rgba(29,92,150,.12), transparent 26rem),
         var(--bg);
     }
 
-    button, select, input { font: inherit; }
-    button, select { color: inherit; }
+    button, select { font: inherit; color: inherit; }
     a { color: inherit; }
+    button:focus-visible, select:focus-visible, a:focus-visible { outline: 3px solid rgba(99,182,255,.6); outline-offset: 3px; }
 
+    .skip-link { position: fixed; left: 12px; top: 12px; z-index: 100; transform: translateY(-160%); padding: 10px 14px; border-radius: 10px; background: #fff; color: #06101c; font-weight: 800; }
+    .skip-link:focus { transform: translateY(0); }
     .app-shell { width: min(1320px, calc(100% - 32px)); margin: 0 auto; }
 
-    .topbar {
-      min-height: 78px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: 24px;
-      border-bottom: 1px solid var(--border);
-    }
-
+    .topbar { min-height: 78px; display: flex; align-items: center; justify-content: space-between; gap: 24px; border-bottom: 1px solid var(--border); }
     .brand { display: flex; align-items: center; gap: 12px; text-decoration: none; }
-    .brand-mark {
-      width: 42px; height: 42px; border-radius: 14px;
-      display: grid; place-items: center;
-      background: linear-gradient(145deg, #78c8ff, #266ec4 68%, #174881);
-      box-shadow: 0 10px 30px rgba(47, 142, 229, .28);
-    }
+    .brand-mark { width: 42px; height: 42px; border-radius: 14px; display: grid; place-items: center; background: linear-gradient(145deg,#78c8ff,#266ec4 68%,#174881); box-shadow: 0 10px 30px rgba(47,142,229,.28); }
     .brand-mark svg { width: 24px; height: 24px; }
-    .brand-copy strong { font: 800 19px/1 Manrope, sans-serif; letter-spacing: -.02em; }
+    .brand-copy strong { display: block; font-size: 19px; line-height: 1; font-weight: 850; letter-spacing: -.03em; }
     .brand-copy span { display: block; margin-top: 5px; color: var(--muted); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; }
-
     .top-actions { display: flex; align-items: center; gap: 10px; }
-    .source-link, .ghost-btn, .primary-btn {
-      display: inline-flex; align-items: center; justify-content: center; gap: 8px;
-      min-height: 42px; padding: 0 14px; border-radius: 13px;
-      border: 1px solid var(--border); text-decoration: none; cursor: pointer;
-      background: rgba(255, 255, 255, .035);
-      transition: .2s ease;
-    }
-    .source-link, .ghost-btn { color: #dfeaf6; }
-    .source-link:hover, .ghost-btn:hover { border-color: rgba(99, 182, 255, .5); background: rgba(99, 182, 255, .08); }
-    .primary-btn { border-color: transparent; background: linear-gradient(135deg, var(--blue), var(--blue-2)); color: #04111d; font-weight: 800; }
-    .primary-btn:hover { transform: translateY(-1px); box-shadow: 0 10px 26px rgba(47, 142, 229, .25); }
+    .live-pill { display: inline-flex; align-items: center; gap: 8px; min-height: 40px; padding: 0 13px; border-radius: 999px; border: 1px solid rgba(117,230,176,.18); background: rgba(117,230,176,.07); color: #c9f9e2; font-size: 12px; font-weight: 800; }
+    .live-dot { width: 8px; height: 8px; border-radius: 50%; background: var(--success); box-shadow: 0 0 0 5px rgba(117,230,176,.1); }
+    .ghost-btn, .source-link { min-height: 42px; display: inline-flex; align-items: center; justify-content: center; gap: 8px; padding: 0 14px; border-radius: 13px; border: 1px solid var(--border); background: rgba(255,255,255,.035); text-decoration: none; cursor: pointer; transition: .2s ease; }
+    .ghost-btn:hover, .source-link:hover { border-color: rgba(99,182,255,.5); background: rgba(99,182,255,.08); }
+    .ghost-btn:disabled { opacity: .55; cursor: progress; }
 
     main { padding: 34px 0 56px; }
     .dashboard { display: grid; gap: 22px; }
+    .status { display: none; margin-bottom: 16px; padding: 12px 14px; border-radius: 14px; color: #cfe1f1; border: 1px solid var(--border); background: rgba(20,40,62,.72); font-size: 13px; }
+    .status.show { display: block; }
+    .status.error { border-color: rgba(255,159,159,.32); color: #ffd0d0; }
 
-    .hero {
-      position: relative; overflow: hidden;
-      display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(360px, .9fr);
-      min-height: 420px;
-      border: 1px solid var(--border); border-radius: var(--radius-xl);
-      background: linear-gradient(145deg, rgba(20, 40, 62, .96), rgba(8, 22, 38, .96));
-      box-shadow: var(--shadow);
-    }
-    .hero::after {
-      content: ""; position: absolute; inset: auto -10% -55% 25%; height: 380px;
-      background: radial-gradient(closest-side, rgba(84, 175, 255, .18), transparent);
-      pointer-events: none;
-    }
-    .hero-content { position: relative; z-index: 2; padding: clamp(28px, 5vw, 54px); display: flex; flex-direction: column; justify-content: space-between; }
+    .hero { position: relative; overflow: hidden; display: grid; grid-template-columns: minmax(0,1.08fr) minmax(360px,.92fr); min-height: 430px; border: 1px solid var(--border); border-radius: var(--radius-xl); background: linear-gradient(145deg,rgba(20,40,62,.96),rgba(8,22,38,.96)); box-shadow: var(--shadow); }
+    .hero::after { content: ""; position: absolute; inset: auto -10% -55% 25%; height: 380px; background: radial-gradient(closest-side,rgba(84,175,255,.18),transparent); pointer-events: none; }
+    .hero-content { position: relative; z-index: 2; padding: clamp(28px,5vw,54px); display: flex; flex-direction: column; justify-content: space-between; }
     .eyebrow { margin: 0 0 14px; color: #83c9ff; font-size: 12px; font-weight: 800; letter-spacing: .14em; text-transform: uppercase; }
-    .hero h1 { margin: 0; max-width: 760px; font: 800 clamp(38px, 6vw, 72px)/.98 Manrope, sans-serif; letter-spacing: -.055em; }
+    .hero h1 { margin: 0; max-width: 760px; font-size: clamp(38px,6vw,70px); line-height: .98; font-weight: 850; letter-spacing: -.055em; }
     .hero h1 span { color: #77c5ff; }
-    .hero-sub { max-width: 650px; margin: 20px 0 0; color: #b8c8d9; font-size: clamp(15px, 2vw, 18px); line-height: 1.65; }
-
+    .hero-sub { max-width: 650px; margin: 20px 0 0; color: #b8c8d9; font-size: clamp(15px,2vw,18px); line-height: 1.65; }
     .control-row { display: flex; flex-wrap: wrap; gap: 10px; margin-top: 34px; }
-    .select-wrap { position: relative; min-width: min(320px, 100%); flex: 1 1 270px; }
+    .select-wrap { position: relative; min-width: min(330px,100%); flex: 1 1 280px; }
     .select-wrap::after { content: "⌄"; position: absolute; right: 15px; top: 50%; transform: translateY(-55%); color: var(--muted); pointer-events: none; }
-    select {
-      width: 100%; min-height: 48px; appearance: none; padding: 0 42px 0 15px;
-      border: 1px solid rgba(160, 190, 220, .18); border-radius: 14px;
-      background: rgba(3, 14, 26, .62); color: #eef6ff; outline: none;
-    }
-    select:focus { border-color: rgba(99, 182, 255, .65); box-shadow: 0 0 0 3px rgba(99, 182, 255, .11); }
-
-    .unit-toggle {
-      display: inline-flex; padding: 4px; border-radius: 14px;
-      background: rgba(3, 14, 26, .62); border: 1px solid rgba(160, 190, 220, .18);
-    }
+    select { width: 100%; min-height: 48px; appearance: none; padding: 0 42px 0 15px; border: 1px solid rgba(160,190,220,.18); border-radius: 14px; background: rgba(3,14,26,.62); color: #eef6ff; }
+    .unit-toggle { display: inline-flex; padding: 4px; border-radius: 14px; background: rgba(3,14,26,.62); border: 1px solid rgba(160,190,220,.18); }
     .unit-toggle button { min-width: 54px; min-height: 38px; border: 0; border-radius: 10px; background: transparent; color: var(--muted); cursor: pointer; font-weight: 800; }
     .unit-toggle button.active { background: #eaf5ff; color: #071522; }
 
-    .hero-art { position: relative; min-height: 420px; overflow: hidden; }
+    .hero-art { position: relative; min-height: 430px; overflow: hidden; }
     .hero-art img { width: 100%; height: 100%; object-fit: cover; display: block; }
-    .hero-art::before { content: ""; position: absolute; z-index: 1; inset: 0; background: linear-gradient(90deg, #0f2032 0%, rgba(15, 32, 50, .08) 36%, rgba(5, 13, 22, .15) 100%); }
-    .condition-float {
-      position: absolute; z-index: 2; right: 24px; bottom: 24px; width: min(330px, calc(100% - 48px));
-      padding: 20px; border-radius: 20px; border: 1px solid rgba(255,255,255,.16);
-      background: rgba(5, 17, 29, .72); backdrop-filter: blur(16px); box-shadow: 0 16px 45px rgba(0,0,0,.26);
-    }
+    .hero-art::before { content: ""; position: absolute; z-index: 1; inset: 0; background: linear-gradient(90deg,#0f2032 0%,rgba(15,32,50,.08) 36%,rgba(5,13,22,.15) 100%); }
+    .condition-float { position: absolute; z-index: 2; right: 24px; bottom: 24px; width: min(355px,calc(100% - 48px)); padding: 20px; border-radius: 20px; border: 1px solid rgba(255,255,255,.16); background: rgba(5,17,29,.76); backdrop-filter: blur(16px); box-shadow: 0 16px 45px rgba(0,0,0,.26); }
     .condition-top { display: flex; justify-content: space-between; gap: 16px; align-items: flex-start; }
-    .condition-label { color: #a9bdd0; font-size: 12px; font-weight: 700; text-transform: uppercase; letter-spacing: .08em; }
-    .condition-name { margin-top: 8px; font: 700 21px/1.2 Manrope, sans-serif; }
-    .condition-temp { font: 800 52px/1 Manrope, sans-serif; letter-spacing: -.05em; }
-    .condition-meta { display: flex; gap: 18px; margin-top: 18px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,.12); color: #c8d7e6; font-size: 13px; }
+    .condition-label { color: #a9bdd0; font-size: 11px; font-weight: 800; text-transform: uppercase; letter-spacing: .08em; }
+    .condition-name { margin-top: 8px; font-size: 21px; line-height: 1.2; font-weight: 800; }
+    .condition-temp { font-size: 52px; line-height: 1; font-weight: 850; letter-spacing: -.05em; }
+    .condition-meta { display: grid; grid-template-columns: 1fr auto; gap: 12px; margin-top: 18px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,.12); color: #c8d7e6; font-size: 12px; }
 
-    .section-grid { display: grid; grid-template-columns: minmax(0, 1.55fr) minmax(290px, .65fr); gap: 22px; }
-    .panel { border: 1px solid var(--border); border-radius: var(--radius-lg); background: linear-gradient(145deg, rgba(14, 29, 46, .94), rgba(8, 20, 34, .96)); box-shadow: 0 14px 42px rgba(0,0,0,.2); }
+    .panel { border: 1px solid var(--border); border-radius: var(--radius-lg); background: linear-gradient(145deg,rgba(14,29,46,.94),rgba(8,20,34,.96)); box-shadow: 0 14px 42px rgba(0,0,0,.2); }
     .panel-pad { padding: 24px; }
     .panel-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 18px; margin-bottom: 20px; }
-    .panel-title { margin: 0; font: 700 22px/1.15 Manrope, sans-serif; letter-spacing: -.025em; }
+    .panel-title { margin: 0; font-size: 22px; line-height: 1.15; font-weight: 820; letter-spacing: -.025em; }
     .panel-copy { margin: 7px 0 0; color: var(--muted); font-size: 13px; }
     .last-updated { color: var(--muted); font-size: 12px; white-space: nowrap; }
+    .section-grid { display: grid; grid-template-columns: minmax(0,1.48fr) minmax(320px,.72fr); gap: 22px; }
 
-    .forecast-grid { display: grid; grid-template-columns: repeat(7, minmax(120px, 1fr)); gap: 10px; overflow-x: auto; padding-bottom: 2px; }
-    .forecast-card {
-      min-width: 125px; padding: 16px 14px; border-radius: 17px;
-      border: 1px solid rgba(160, 190, 220, .11); background: rgba(255,255,255,.025);
-      transition: .2s ease;
-    }
-    .forecast-card:hover { transform: translateY(-3px); border-color: rgba(99, 182, 255, .32); background: rgba(99, 182, 255, .055); }
-    .day-name { font-weight: 800; font-size: 13px; }
+    .metrics { display: grid; grid-template-columns: repeat(6,minmax(0,1fr)); gap: 10px; }
+    .metric { min-height: 116px; padding: 16px; border: 1px solid rgba(160,190,220,.11); border-radius: 17px; background: rgba(255,255,255,.025); }
+    .metric span { color: var(--muted); font-size: 10px; font-weight: 800; text-transform: uppercase; letter-spacing: .07em; }
+    .metric strong { display: block; margin-top: 12px; font-size: 24px; line-height: 1.1; font-weight: 850; letter-spacing: -.035em; }
+    .metric small { display: block; margin-top: 7px; color: #a9bbcb; font-size: 11px; line-height: 1.35; }
+
+    .forecast-grid { display: grid; grid-template-columns: repeat(7,minmax(130px,1fr)); gap: 10px; overflow-x: auto; padding-bottom: 2px; }
+    .forecast-card { min-width: 132px; padding: 16px 14px; border-radius: 17px; border: 1px solid rgba(160,190,220,.11); background: rgba(255,255,255,.025); transition: .2s ease; }
+    .forecast-card:hover { transform: translateY(-3px); border-color: rgba(99,182,255,.32); background: rgba(99,182,255,.055); }
+    .day-name { font-weight: 850; font-size: 13px; }
     .day-date { margin-top: 4px; color: var(--muted); font-size: 11px; }
-    .wx-glyph { display: grid; place-items: center; width: 46px; height: 46px; margin: 22px 0 16px; border-radius: 14px; background: rgba(99, 182, 255, .08); font-size: 26px; }
+    .wx-glyph { display: grid; place-items: center; width: 48px; height: 48px; margin: 18px 0 14px; border-radius: 14px; background: rgba(99,182,255,.08); font-size: 27px; }
     .wx-summary { min-height: 34px; color: #cfe0f0; font-size: 12px; line-height: 1.4; }
-    .temp-line { display: flex; gap: 7px; align-items: baseline; margin-top: 14px; }
-    .temp-hi { font: 800 22px/1 Manrope, sans-serif; }
-    .temp-lo { color: #87a3bd; font-weight: 700; }
+    .temp-line { display: flex; gap: 7px; align-items: baseline; margin-top: 12px; }
+    .temp-hi { font-size: 22px; line-height: 1; font-weight: 850; }
+    .temp-lo { color: #87a3bd; font-weight: 750; }
+    .day-meta { display: grid; gap: 5px; margin-top: 12px; padding-top: 11px; border-top: 1px solid rgba(160,190,220,.08); color: #93a9bf; font-size: 10px; }
 
-    .metric-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 10px; }
-    .metric { min-height: 122px; padding: 17px; border: 1px solid rgba(160,190,220,.11); border-radius: 17px; background: rgba(255,255,255,.025); }
-    .metric span { color: var(--muted); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: .06em; }
-    .metric strong { display: block; margin-top: 12px; font: 800 27px/1.1 Manrope, sans-serif; letter-spacing: -.035em; }
-    .metric small { display: block; margin-top: 7px; color: #a9bbcb; font-size: 11px; line-height: 1.4; }
-
-    .chart-wrap { position: relative; min-height: 270px; overflow: hidden; border-radius: 17px; background: linear-gradient(180deg, rgba(99,182,255,.055), rgba(255,255,255,.01)); border: 1px solid rgba(160,190,220,.09); }
-    .chart-wrap svg { display: block; width: 100%; height: 270px; }
+    .chart-wrap { position: relative; min-height: 280px; overflow: hidden; border-radius: 17px; background: linear-gradient(180deg,rgba(99,182,255,.055),rgba(255,255,255,.01)); border: 1px solid rgba(160,190,220,.09); }
+    .chart-wrap svg { display: block; width: 100%; height: 280px; }
     .chart-legend { display: flex; gap: 16px; align-items: center; margin-top: 13px; color: var(--muted); font-size: 12px; }
     .legend-dot { display: inline-block; width: 8px; height: 8px; border-radius: 999px; margin-right: 6px; }
     .legend-hi { background: var(--warm); }
     .legend-lo { background: var(--blue); }
-
     .insight-list { display: grid; gap: 10px; }
     .insight { display: flex; align-items: center; gap: 13px; min-height: 72px; padding: 14px; border-radius: 16px; background: rgba(255,255,255,.025); border: 1px solid rgba(160,190,220,.09); }
     .insight-icon { width: 38px; height: 38px; border-radius: 12px; display: grid; place-items: center; flex: 0 0 auto; background: rgba(99,182,255,.09); }
     .insight strong { display: block; font-size: 13px; }
     .insight span { display: block; margin-top: 4px; color: var(--muted); font-size: 11px; line-height: 1.4; }
 
-    .status {
-      display: none; margin-bottom: 16px; padding: 12px 14px; border-radius: 14px;
-      color: #cfe1f1; border: 1px solid var(--border); background: rgba(20, 40, 62, .72); font-size: 13px;
-    }
-    .status.show { display: block; }
-    .status.error { border-color: rgba(255,159,159,.32); color: #ffd0d0; }
-
-    .skeleton { position: relative; overflow: hidden; color: transparent !important; background: rgba(255,255,255,.055) !important; border-radius: 8px; }
-    .skeleton::after { content: ""; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg, transparent, rgba(255,255,255,.08), transparent); animation: shimmer 1.25s infinite; }
+    .skeleton { position: relative; overflow: hidden; color: transparent!important; background: rgba(255,255,255,.055)!important; border-radius: 8px; }
+    .skeleton::after { content: ""; position: absolute; inset: 0; transform: translateX(-100%); background: linear-gradient(90deg,transparent,rgba(255,255,255,.08),transparent); animation: shimmer 1.2s infinite; }
     @keyframes shimmer { to { transform: translateX(100%); } }
 
-    footer { border-top: 1px solid var(--border); color: var(--muted); }
-    .footer-inner { min-height: 82px; display: flex; align-items: center; justify-content: space-between; gap: 18px; font-size: 12px; }
-    .footer-inner a { color: #c7d8e8; text-decoration: none; }
+    footer { border-top: 1px solid var(--border); }
+    .footer-inner { min-height: 82px; display: flex; justify-content: space-between; align-items: center; gap: 20px; color: var(--muted); font-size: 12px; }
+    .footer-inner a { color: #bcd9f4; }
 
-    @media (max-width: 980px) {
-      .hero, .section-grid { grid-template-columns: 1fr; }
-      .hero-art { min-height: 340px; }
-      .forecast-grid { grid-template-columns: repeat(7, 135px); }
-      .topbar { min-height: 70px; }
-    }
-    @media (max-width: 640px) {
-      .app-shell { width: min(100% - 20px, 1320px); }
-      .top-actions .source-link { display: none; }
-      main { padding-top: 20px; }
-      .hero-content { padding: 28px 20px 24px; }
-      .hero h1 { font-size: 43px; }
-      .hero-art { min-height: 300px; }
-      .condition-float { right: 14px; bottom: 14px; width: calc(100% - 28px); }
-      .condition-temp { font-size: 45px; }
-      .panel-pad { padding: 18px; }
-      .panel-head { align-items: flex-start; flex-direction: column; gap: 8px; }
-      .metric-grid { grid-template-columns: 1fr 1fr; }
-      .footer-inner { align-items: flex-start; flex-direction: column; justify-content: center; padding: 20px 0; }
-    }
+    @media (max-width: 1080px) { .metrics { grid-template-columns: repeat(3,1fr); } .section-grid { grid-template-columns: 1fr; } }
+    @media (max-width: 900px) { .hero { grid-template-columns: 1fr; } .hero-art { min-height: 360px; } .top-actions .source-link { display: none; } }
+    @media (max-width: 640px) { .app-shell { width: min(100% - 20px,1320px); } .topbar { min-height: 68px; } .brand-copy span, .live-pill { display: none; } main { padding-top: 20px; } .hero-content { padding: 26px 20px 28px; } .hero h1 { font-size: 42px; } .hero-art { min-height: 300px; } .condition-float { right: 14px; bottom: 14px; width: calc(100% - 28px); } .metrics { grid-template-columns: repeat(2,1fr); } .panel-pad { padding: 18px; } .panel-head { align-items: flex-start; flex-direction: column; } .footer-inner { align-items: flex-start; flex-direction: column; justify-content: center; padding: 20px 0; } }
+    @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto!important; animation-duration: .001ms!important; animation-iteration-count: 1!important; transition-duration: .001ms!important; } }
   </style>
 </head>
 <body>
-  <div class="app-shell">
-    <nav class="topbar" aria-label="Primary">
-      <a class="brand" href="#" aria-label="SkyCast home">
-        <span class="brand-mark" aria-hidden="true">
-          <svg viewBox="0 0 24 24" fill="none"><path d="M7.2 17.2h9.5a3.8 3.8 0 0 0 .2-7.6 5.35 5.35 0 0 0-10.3 1.6A3 3 0 0 0 7.2 17.2Z" stroke="white" stroke-width="1.8" stroke-linecap="round"/><path d="M8 20h8" stroke="white" stroke-width="1.8" stroke-linecap="round" opacity=".72"/></svg>
-        </span>
+  <a class="skip-link" href="#main">Skip to forecast</a>
+  <header>
+    <div class="app-shell topbar">
+      <a class="brand" href="./" aria-label="SkyCast home">
+        <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none"><path d="M4 15.5a4.5 4.5 0 0 1 3.9-4.46A5.6 5.6 0 0 1 18.6 12.8 3.6 3.6 0 0 1 18 20H8.5A4.5 4.5 0 0 1 4 15.5Z" fill="#e9f6ff"/><path d="M8 6.5h1.5M15.5 5l1 1M12 2.5V4" stroke="#e9f6ff" stroke-width="1.7" stroke-linecap="round"/></svg></span>
         <span class="brand-copy"><strong>SkyCast</strong><span>European weather intelligence</span></span>
       </a>
       <div class="top-actions">
-        <a class="source-link" href="https://www.7timer.info/" target="_blank" rel="noopener">Data source ↗</a>
+        <span class="live-pill"><i class="live-dot" aria-hidden="true"></i>Live forecast</span>
+        <a class="source-link" href="https://open-meteo.com/en/docs" target="_blank" rel="noopener">Data source ↗</a>
         <button class="ghost-btn" id="refreshBtn" type="button">Refresh</button>
       </div>
-    </nav>
+    </div>
+  </header>
 
-    <main>
+  <main id="main">
+    <div class="app-shell">
       <div id="status" class="status" role="status" aria-live="polite"></div>
       <div class="dashboard">
-        <section class="hero" aria-labelledby="heroTitle">
+        <section class="hero" aria-labelledby="hero-title">
           <div class="hero-content">
             <div>
-              <p class="eyebrow">7-day forecast • Europe</p>
-              <h1 id="heroTitle">Weather clarity, <span>without the clutter.</span></h1>
-              <p class="hero-sub">A focused dashboard for comparing daily conditions, temperature movement and the next forecast window across major European cities.</p>
+              <p class="eyebrow">Live weather • 7-day planning</p>
+              <h1 id="hero-title">Weather intelligence for Europe, <span>at a glance.</span></h1>
+              <p class="hero-sub">Current conditions, temperature trends, precipitation risk, wind, and daylight details for major European cities—without an API key or backend.</p>
             </div>
-            <div class="control-row" aria-label="Forecast controls">
-              <div class="select-wrap"><select id="city" aria-label="Choose a city"></select></div>
-              <div class="unit-toggle" aria-label="Temperature unit">
-                <button id="unitC" class="active" type="button" aria-pressed="true">°C</button>
+            <div class="control-row">
+              <label class="select-wrap"><span style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Choose city</span><select id="city" aria-label="Choose a European city"></select></label>
+              <div class="unit-toggle" role="group" aria-label="Temperature unit">
+                <button id="unitC" type="button" aria-pressed="true">°C</button>
                 <button id="unitF" type="button" aria-pressed="false">°F</button>
               </div>
             </div>
           </div>
-
           <div class="hero-art">
-            <img id="heroArtwork" src="assets/hero-clear.svg" alt="Stylized clear-weather European city scene">
+            <img id="heroArtwork" src="assets/hero-clear.svg" alt="Stylized European weather scene">
             <div class="condition-float">
               <div class="condition-top">
-                <div><div class="condition-label">Next forecast</div><div class="condition-name" id="currentCondition">Loading…</div></div>
+                <div><div class="condition-label">Current conditions</div><div class="condition-name" id="currentCondition">Loading…</div></div>
                 <div class="condition-temp" id="currentTemp">--°</div>
               </div>
-              <div class="condition-meta">
-                <span id="currentCity">Select a city</span>
-                <span id="forecastTime">—</span>
-              </div>
+              <div class="condition-meta"><span id="currentCity">Select a city</span><span id="forecastTime">—</span></div>
             </div>
           </div>
         </section>
 
-        <section class="section-grid" aria-label="Forecast summary">
-          <div class="panel panel-pad">
-            <div class="panel-head">
-              <div><h2 class="panel-title">7-day outlook</h2><p class="panel-copy">Daily high, low and dominant condition.</p></div>
-              <span id="lastUpdated" class="last-updated">Waiting for data</span>
-            </div>
-            <div id="forecastGrid" class="forecast-grid"></div>
+        <section class="panel panel-pad" aria-label="Current weather metrics">
+          <div class="panel-head"><div><h2 class="panel-title">Current conditions</h2><p class="panel-copy">Model-based weather conditions for the selected city.</p></div><span id="lastUpdated" class="last-updated">Waiting for data</span></div>
+          <div class="metrics">
+            <div class="metric"><span>Feels like</span><strong id="feelsMetric">—</strong><small>Apparent temperature</small></div>
+            <div class="metric"><span>Humidity</span><strong id="humidityMetric">—</strong><small>Relative humidity</small></div>
+            <div class="metric"><span>Wind</span><strong id="windMetric">—</strong><small id="windDetail">10 m speed</small></div>
+            <div class="metric"><span>Cloud cover</span><strong id="cloudMetric">—</strong><small>Current sky coverage</small></div>
+            <div class="metric"><span>Rain chance</span><strong id="rainMetric">—</strong><small>Today's maximum probability</small></div>
+            <div class="metric"><span>Sunset</span><strong id="sunsetMetric">—</strong><small id="sunriseDetail">Sunrise —</small></div>
           </div>
-
-          <aside class="panel panel-pad" aria-label="Forecast metrics">
-            <div class="panel-head"><div><h2 class="panel-title">At a glance</h2><p class="panel-copy">Useful details from the next forecast period.</p></div></div>
-            <div class="metric-grid">
-              <div class="metric"><span>Humidity</span><strong id="humidityMetric">—</strong><small>Relative humidity</small></div>
-              <div class="metric"><span>Wind</span><strong id="windMetric">—</strong><small id="windDetail">10 m forecast</small></div>
-              <div class="metric"><span>Daily high</span><strong id="highMetric">—</strong><small id="highDetail">Today</small></div>
-              <div class="metric"><span>Daily low</span><strong id="lowMetric">—</strong><small id="lowDetail">Today</small></div>
-            </div>
-          </aside>
         </section>
 
-        <section class="section-grid" aria-label="Temperature trend and insights">
+        <section class="panel panel-pad" aria-label="Seven day forecast">
+          <div class="panel-head"><div><h2 class="panel-title">7-day outlook</h2><p class="panel-copy">Daily high, low, weather condition, precipitation probability, and peak wind.</p></div><span id="timezoneLabel" class="last-updated">Local timezone</span></div>
+          <div id="forecastGrid" class="forecast-grid"></div>
+        </section>
+
+        <section class="section-grid" aria-label="Temperature trend and forecast insights">
           <div class="panel panel-pad">
-            <div class="panel-head"><div><h2 class="panel-title">Temperature trend</h2><p class="panel-copy">High and low movement across the selected forecast window.</p></div></div>
+            <div class="panel-head"><div><h2 class="panel-title">Temperature trend</h2><p class="panel-copy">High and low movement across the next seven days.</p></div></div>
             <div id="chart" class="chart-wrap" aria-label="Seven-day temperature chart"></div>
             <div class="chart-legend"><span><i class="legend-dot legend-hi"></i>High</span><span><i class="legend-dot legend-lo"></i>Low</span></div>
           </div>
-
           <aside class="panel panel-pad">
             <div class="panel-head"><div><h2 class="panel-title">Forecast insights</h2><p class="panel-copy">Fast signals from the week ahead.</p></div></div>
             <div id="insights" class="insight-list"></div>
           </aside>
         </section>
       </div>
-    </main>
-  </div>
+    </div>
+  </main>
 
   <footer>
     <div class="app-shell footer-inner">
-      <span>© <span id="year"></span> SkyCast. Built as a client-side weather data project.</span>
-      <span>Forecast data: <a href="https://www.7timer.info/" target="_blank" rel="noopener">7Timer!</a> • No API key required</span>
+      <span>© <span id="year"></span> SkyCast. Client-side weather dashboard.</span>
+      <span>Forecast data: <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a> • No API key required</span>
     </div>
   </footer>
 
   <script>
     const CITIES = [
-      {name:"Amsterdam, Netherlands", lat:52.3676, lon:4.9041}, {name:"Athens, Greece", lat:37.9838, lon:23.7275},
-      {name:"Barcelona, Spain", lat:41.3874, lon:2.1686}, {name:"Berlin, Germany", lat:52.52, lon:13.405},
-      {name:"Budapest, Hungary", lat:47.4979, lon:19.0402}, {name:"Copenhagen, Denmark", lat:55.6761, lon:12.5683},
-      {name:"Dublin, Ireland", lat:53.3498, lon:-6.2603}, {name:"Edinburgh, UK", lat:55.9533, lon:-3.1883},
-      {name:"Helsinki, Finland", lat:60.1699, lon:24.9384}, {name:"Lisbon, Portugal", lat:38.7223, lon:-9.1393},
-      {name:"London, UK", lat:51.5074, lon:-0.1278}, {name:"Madrid, Spain", lat:40.4168, lon:-3.7038},
-      {name:"Oslo, Norway", lat:59.9139, lon:10.7522}, {name:"Paris, France", lat:48.8566, lon:2.3522},
-      {name:"Prague, Czechia", lat:50.0755, lon:14.4378}, {name:"Reykjavík, Iceland", lat:64.1466, lon:-21.9426},
-      {name:"Rome, Italy", lat:41.9028, lon:12.4964}, {name:"Stockholm, Sweden", lat:59.3293, lon:18.0686},
-      {name:"Tallinn, Estonia", lat:59.437, lon:24.7536}, {name:"Vienna, Austria", lat:48.2082, lon:16.3738},
-      {name:"Warsaw, Poland", lat:52.2297, lon:21.0122}, {name:"Zurich, Switzerland", lat:47.3769, lon:8.5417}
+      {name:"Amsterdam, Netherlands",lat:52.3676,lon:4.9041},{name:"Athens, Greece",lat:37.9838,lon:23.7275},
+      {name:"Barcelona, Spain",lat:41.3874,lon:2.1686},{name:"Berlin, Germany",lat:52.52,lon:13.405},
+      {name:"Budapest, Hungary",lat:47.4979,lon:19.0402},{name:"Copenhagen, Denmark",lat:55.6761,lon:12.5683},
+      {name:"Dublin, Ireland",lat:53.3498,lon:-6.2603},{name:"Edinburgh, UK",lat:55.9533,lon:-3.1883},
+      {name:"Helsinki, Finland",lat:60.1699,lon:24.9384},{name:"Lisbon, Portugal",lat:38.7223,lon:-9.1393},
+      {name:"London, UK",lat:51.5074,lon:-0.1278},{name:"Madrid, Spain",lat:40.4168,lon:-3.7038},
+      {name:"Oslo, Norway",lat:59.9139,lon:10.7522},{name:"Paris, France",lat:48.8566,lon:2.3522},
+      {name:"Prague, Czechia",lat:50.0755,lon:14.4378},{name:"Reykjavík, Iceland",lat:64.1466,lon:-21.9426},
+      {name:"Rome, Italy",lat:41.9028,lon:12.4964},{name:"Stockholm, Sweden",lat:59.3293,lon:18.0686},
+      {name:"Tallinn, Estonia",lat:59.437,lon:24.7536},{name:"Vienna, Austria",lat:48.2082,lon:16.3738},
+      {name:"Warsaw, Poland",lat:52.2297,lon:21.0122},{name:"Zurich, Switzerland",lat:47.3769,lon:8.5417}
     ];
 
-    const WEATHER_LABEL = {
-      clear:"Clear", pcloudy:"Partly cloudy", mcloudy:"Mostly cloudy", cloudy:"Cloudy", humid:"Humid",
-      lightrain:"Light rain", oshower:"Occasional showers", ishower:"Isolated showers", lightsnow:"Light snow",
-      snow:"Snow", rainsnow:"Rain & snow", rain:"Rain", heavyrain:"Heavy rain", ts:"Thunderstorm",
-      tstorm:"Thunderstorm", fog:"Fog", windy:"Windy", hail:"Hail"
-    };
-    const WEATHER_GLYPH = {
-      clear:"☀", pcloudy:"⛅", mcloudy:"☁", cloudy:"☁", humid:"◌", lightrain:"🌦", oshower:"🌦",
-      ishower:"🌦", lightsnow:"🌨", snow:"❄", rainsnow:"🌨", rain:"🌧", heavyrain:"🌧", ts:"⛈",
-      tstorm:"⛈", fog:"≋", windy:"〰", hail:"◆"
+    const WMO = {
+      0:["Clear sky","☀","clear"],1:["Mainly clear","🌤","clear"],2:["Partly cloudy","⛅","cloud"],3:["Overcast","☁","cloud"],
+      45:["Fog","≋","cloud"],48:["Rime fog","≋","cloud"],51:["Light drizzle","🌦","rain"],53:["Drizzle","🌦","rain"],55:["Dense drizzle","🌧","rain"],
+      56:["Freezing drizzle","🌧","rain"],57:["Dense freezing drizzle","🌧","rain"],61:["Light rain","🌦","rain"],63:["Rain","🌧","rain"],65:["Heavy rain","🌧","rain"],
+      66:["Freezing rain","🌧","rain"],67:["Heavy freezing rain","🌧","rain"],71:["Light snow","🌨","snow"],73:["Snow","❄","snow"],75:["Heavy snow","❄","snow"],77:["Snow grains","❄","snow"],
+      80:["Rain showers","🌦","rain"],81:["Rain showers","🌧","rain"],82:["Heavy rain showers","🌧","rain"],85:["Snow showers","🌨","snow"],86:["Heavy snow showers","❄","snow"],
+      95:["Thunderstorm","⛈","rain"],96:["Thunderstorm with hail","⛈","rain"],99:["Severe thunderstorm with hail","⛈","rain"]
     };
 
-    const citySelect = document.getElementById("city");
-    const unitC = document.getElementById("unitC");
-    const unitF = document.getElementById("unitF");
-    const refreshBtn = document.getElementById("refreshBtn");
-    const statusEl = document.getElementById("status");
-    const forecastGrid = document.getElementById("forecastGrid");
-    const chartEl = document.getElementById("chart");
-    const insightsEl = document.getElementById("insights");
-    let unit = localStorage.getItem("skycastUnit") || "metric";
+    const els = Object.fromEntries([
+      "city","unitC","unitF","refreshBtn","status","forecastGrid","chart","insights","heroArtwork","currentCondition","currentTemp","currentCity","forecastTime","lastUpdated","timezoneLabel","feelsMetric","humidityMetric","windMetric","windDetail","cloudMetric","rainMetric","sunsetMetric","sunriseDetail"
+    ].map(id => [id, document.getElementById(id)]));
 
+    let unit = localStorage.getItem("skycastUnit") || "celsius";
+    let activeController = null;
+    let loadSequence = 0;
     document.getElementById("year").textContent = new Date().getFullYear();
-    CITIES.forEach((city, i) => {
-      const option = document.createElement("option");
-      option.value = i; option.textContent = city.name; citySelect.appendChild(option);
-    });
-    citySelect.value = localStorage.getItem("skycastCity") || "10";
 
-    function syncUnitButtons() {
-      const metric = unit === "metric";
-      unitC.classList.toggle("active", metric); unitF.classList.toggle("active", !metric);
-      unitC.setAttribute("aria-pressed", metric); unitF.setAttribute("aria-pressed", !metric);
-    }
-    syncUnitButtons();
+    CITIES.forEach((city,index) => { const option = document.createElement("option"); option.value = index; option.textContent = city.name; els.city.appendChild(option); });
+    const savedCity = Number(localStorage.getItem("skycastCity"));
+    els.city.value = Number.isInteger(savedCity) && savedCity >= 0 && savedCity < CITIES.length ? String(savedCity) : "10";
 
-    function showStatus(message, error = false) {
-      statusEl.textContent = message;
-      statusEl.classList.toggle("show", Boolean(message));
-      statusEl.classList.toggle("error", error);
-    }
+    function wmo(code) { return WMO[Number(code)] || ["Variable conditions","☁","cloud"]; }
+    function syncUnitButtons() { const c = unit === "celsius"; els.unitC.classList.toggle("active",c); els.unitF.classList.toggle("active",!c); els.unitC.setAttribute("aria-pressed",String(c)); els.unitF.setAttribute("aria-pressed",String(!c)); }
+    function showStatus(message,error=false) { els.status.textContent = message; els.status.classList.toggle("show",Boolean(message)); els.status.classList.toggle("error",error); }
+    function formatTemp(value) { return Number.isFinite(Number(value)) ? `${Math.round(Number(value))}°` : "—"; }
+    function formatPct(value) { return Number.isFinite(Number(value)) ? `${Math.round(Number(value))}%` : "—"; }
+    function formatTime(localIso) { if (!localIso || !String(localIso).includes("T")) return "—"; const [h,m] = String(localIso).split("T")[1].split(":"); const hour = Number(h); const suffix = hour >= 12 ? "PM" : "AM"; return `${hour % 12 || 12}:${m} ${suffix}`; }
+    function windDirection(degrees) { if (!Number.isFinite(Number(degrees))) return ""; const dirs = ["N","NE","E","SE","S","SW","W","NW"]; return dirs[Math.round(Number(degrees)/45)%8]; }
 
-    function fetchURL(city) {
-      return `https://www.7timer.info/bin/api.pl?lon=${city.lon}&lat=${city.lat}&product=civil&output=json`;
-    }
-
-    function formatTemp(c) {
-      const value = unit === "british" ? (c * 9 / 5) + 32 : c;
-      return `${Math.round(value)}°`;
-    }
-
-    function toDateFromInit(init, hours) {
-      const norm = String(init || "").replace(/\s/g, "");
-      const y = Number(norm.slice(0,4)); const m = Number(norm.slice(4,6)) - 1;
-      const d = Number(norm.slice(6,8)); const h = Number(norm.slice(8,10)) || 0;
-      const date = new Date(Date.UTC(y, m, d, h));
-      date.setUTCHours(date.getUTCHours() + Number(hours || 0));
-      return date;
-    }
-
-    function groupDaily(api) {
-      const groups = new Map();
-      for (const row of api.dataseries || []) {
-        const date = toDateFromInit(api.init, row.timepoint);
-        const key = date.toISOString().slice(0, 10);
-        if (!groups.has(key)) groups.set(key, { date, temps: [], weather: [] });
-        const day = groups.get(key);
-        day.temps.push(Number(row.temp2m)); day.weather.push(row.weather);
-      }
-      return [...groups.values()].sort((a,b) => a.date - b.date).slice(0,7).map(day => {
-        const count = day.weather.reduce((acc, key) => (acc[key] = (acc[key] || 0) + 1, acc), {});
-        const condition = Object.keys(count).sort((a,b) => count[b] - count[a])[0] || "cloudy";
-        return { date: day.date, high: Math.max(...day.temps), low: Math.min(...day.temps), condition };
+    function buildURL(city) {
+      const params = new URLSearchParams({
+        latitude:String(city.lat), longitude:String(city.lon), timezone:"auto", forecast_days:"7",
+        temperature_unit:unit, wind_speed_unit:unit === "fahrenheit" ? "mph" : "kmh", precipitation_unit:unit === "fahrenheit" ? "inch" : "mm",
+        current:"temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,weather_code,cloud_cover,wind_speed_10m,wind_direction_10m,wind_gusts_10m,is_day",
+        daily:"weather_code,temperature_2m_max,temperature_2m_min,apparent_temperature_max,apparent_temperature_min,precipitation_probability_max,precipitation_sum,wind_speed_10m_max,wind_gusts_10m_max,sunrise,sunset"
       });
+      return `https://api.open-meteo.com/v1/forecast?${params}`;
     }
 
-    function visualTheme(condition) {
-      if (["rain","heavyrain","lightrain","oshower","ishower","ts","tstorm","hail"].includes(condition)) return "rain";
-      if (["snow","lightsnow","rainsnow"].includes(condition)) return "snow";
-      if (["cloudy","mcloudy","pcloudy","humid","fog","windy"].includes(condition)) return "cloud";
-      return "clear";
+    function normalize(api) {
+      const d = api.daily || {};
+      if (!api.current || !Array.isArray(d.time) || d.time.length < 1) throw new Error("Forecast payload is incomplete");
+      const days = d.time.slice(0,7).map((date,index) => ({
+        date, code:d.weather_code?.[index], high:d.temperature_2m_max?.[index], low:d.temperature_2m_min?.[index], feelsHigh:d.apparent_temperature_max?.[index], feelsLow:d.apparent_temperature_min?.[index],
+        rainChance:d.precipitation_probability_max?.[index], precipitation:d.precipitation_sum?.[index], wind:d.wind_speed_10m_max?.[index], gust:d.wind_gusts_10m_max?.[index], sunrise:d.sunrise?.[index], sunset:d.sunset?.[index]
+      }));
+      return {current:api.current, days, timezone:api.timezone || "Local time", timezoneAbbr:api.timezone_abbreviation || ""};
     }
 
-    function renderHero(city, api, days) {
-      const next = api.dataseries?.[0];
-      const condition = next?.weather || days[0]?.condition || "cloudy";
-      const nextDate = next ? toDateFromInit(api.init, next.timepoint) : null;
-      document.getElementById("currentCondition").textContent = WEATHER_LABEL[condition] || condition;
-      document.getElementById("currentTemp").textContent = next ? formatTemp(Number(next.temp2m)) : "—";
-      document.getElementById("currentCity").textContent = city.name;
-      document.getElementById("forecastTime").textContent = nextDate ? nextDate.toLocaleString(undefined, {weekday:"short", hour:"numeric"}) : "—";
-      const theme = visualTheme(condition);
-      const art = document.getElementById("heroArtwork");
-      art.src = `assets/hero-${theme}.svg`;
-      art.alt = `${WEATHER_LABEL[condition] || "Weather"} themed European city illustration`;
+    function renderHero(city,data) {
+      const [label,,theme] = wmo(data.current.weather_code);
+      els.currentCondition.textContent = label;
+      els.currentTemp.textContent = formatTemp(data.current.temperature_2m);
+      els.currentCity.textContent = city.name;
+      const localTime = String(data.current.time || "").slice(11,16);
+      els.forecastTime.textContent = `${localTime || "—"}${data.timezoneAbbr ? ` ${data.timezoneAbbr}` : ""}`;
+      els.heroArtwork.src = `assets/hero-${theme}.svg`;
+      els.heroArtwork.alt = `${label} themed European weather illustration`;
+    }
+
+    function renderMetrics(data) {
+      const c = data.current, today = data.days[0] || {};
+      const windUnit = unit === "fahrenheit" ? "mph" : "km/h";
+      els.feelsMetric.textContent = formatTemp(c.apparent_temperature);
+      els.humidityMetric.textContent = formatPct(c.relative_humidity_2m);
+      els.windMetric.textContent = Number.isFinite(Number(c.wind_speed_10m)) ? `${Math.round(c.wind_speed_10m)} ${windUnit}` : "—";
+      const direction = windDirection(c.wind_direction_10m); els.windDetail.textContent = direction ? `${direction} • gusts ${Math.round(c.wind_gusts_10m || 0)} ${windUnit}` : `10 m wind speed`;
+      els.cloudMetric.textContent = formatPct(c.cloud_cover);
+      els.rainMetric.textContent = formatPct(today.rainChance);
+      els.sunsetMetric.textContent = formatTime(today.sunset);
+      els.sunriseDetail.textContent = `Sunrise ${formatTime(today.sunrise)}`;
+      els.timezoneLabel.textContent = data.timezone;
     }
 
     function renderForecast(days) {
-      forecastGrid.innerHTML = days.map(day => {
-        const weekday = day.date.toLocaleDateString(undefined, {weekday:"short"});
-        const date = day.date.toLocaleDateString(undefined, {month:"short", day:"numeric"});
-        return `<article class="forecast-card">
-          <div class="day-name">${weekday}</div><div class="day-date">${date}</div>
-          <div class="wx-glyph" aria-hidden="true">${WEATHER_GLYPH[day.condition] || "☁"}</div>
-          <div class="wx-summary">${WEATHER_LABEL[day.condition] || day.condition}</div>
-          <div class="temp-line"><span class="temp-hi">${formatTemp(day.high)}</span><span class="temp-lo">${formatTemp(day.low)}</span></div>
-        </article>`;
+      const windUnit = unit === "fahrenheit" ? "mph" : "km/h";
+      els.forecastGrid.innerHTML = days.map(day => {
+        const [label,glyph] = wmo(day.code);
+        const dt = new Date(`${day.date}T12:00:00`);
+        const weekday = dt.toLocaleDateString(undefined,{weekday:"short"});
+        const date = dt.toLocaleDateString(undefined,{month:"short",day:"numeric"});
+        return `<article class="forecast-card"><div class="day-name">${weekday}</div><div class="day-date">${date}</div><div class="wx-glyph" aria-hidden="true">${glyph}</div><div class="wx-summary">${label}</div><div class="temp-line"><span class="temp-hi">${formatTemp(day.high)}</span><span class="temp-lo">${formatTemp(day.low)}</span></div><div class="day-meta"><span>Rain ${formatPct(day.rainChance)}</span><span>Wind ${Number.isFinite(Number(day.wind)) ? `${Math.round(day.wind)} ${windUnit}` : "—"}</span></div></article>`;
       }).join("");
     }
 
-    function renderMetrics(api, days) {
-      const next = api.dataseries?.[0] || {};
-      const wind = next.wind10m || {};
-      const humidity = next.rh2m;
-      document.getElementById("humidityMetric").textContent = humidity == null ? "—" : String(humidity).includes("%") ? humidity : `${humidity}%`;
-      document.getElementById("windMetric").textContent = wind.speed == null ? "—" : `Level ${wind.speed}`;
-      document.getElementById("windDetail").textContent = wind.direction ? `${wind.direction} direction • 10 m` : "10 m forecast";
-      document.getElementById("highMetric").textContent = days[0] ? formatTemp(days[0].high) : "—";
-      document.getElementById("lowMetric").textContent = days[0] ? formatTemp(days[0].low) : "—";
-      if (days[0]) {
-        const label = days[0].date.toLocaleDateString(undefined, {weekday:"long"});
-        document.getElementById("highDetail").textContent = label;
-        document.getElementById("lowDetail").textContent = label;
-      }
-    }
-
     function renderChart(days) {
-      if (!days.length) { chartEl.innerHTML = ""; return; }
-      const highs = days.map(d => unit === "british" ? d.high * 9/5 + 32 : d.high);
-      const lows = days.map(d => unit === "british" ? d.low * 9/5 + 32 : d.low);
-      const all = highs.concat(lows);
-      let min = Math.floor(Math.min(...all) - 2), max = Math.ceil(Math.max(...all) + 2);
-      if (min === max) max += 1;
-      const W = 900, H = 270, left = 54, right = 28, top = 30, bottom = 46;
-      const x = i => left + i * ((W - left - right) / Math.max(days.length - 1, 1));
-      const y = value => top + (max - value) * ((H - top - bottom) / (max - min));
-      const points = arr => arr.map((v,i) => `${x(i)},${y(v)}`).join(" ");
-      const gridVals = Array.from({length:4}, (_,i) => min + i * ((max-min)/3));
-      const grid = gridVals.map(v => `<line x1="${left}" x2="${W-right}" y1="${y(v)}" y2="${y(v)}" stroke="rgba(160,190,220,.10)"/><text x="12" y="${y(v)+4}" fill="#7890a8" font-size="11">${Math.round(v)}°</text>`).join("");
-      const labels = days.map((d,i) => `<text x="${x(i)}" y="${H-15}" text-anchor="middle" fill="#7890a8" font-size="11">${d.date.toLocaleDateString(undefined,{weekday:"short"})}</text>`).join("");
-      const highDots = highs.map((v,i) => `<circle cx="${x(i)}" cy="${y(v)}" r="4" fill="#ffd178"/><text x="${x(i)}" y="${y(v)-10}" text-anchor="middle" fill="#ffdba0" font-size="11" font-weight="700">${Math.round(v)}°</text>`).join("");
-      const lowDots = lows.map((v,i) => `<circle cx="${x(i)}" cy="${y(v)}" r="4" fill="#63b6ff"/>`).join("");
-      chartEl.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="High and low temperature trend">${grid}<polyline points="${points(highs)}" fill="none" stroke="#ffd178" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><polyline points="${points(lows)}" fill="none" stroke="#63b6ff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>${highDots}${lowDots}${labels}</svg>`;
+      const highs = days.map(d => Number(d.high)).filter(Number.isFinite), lows = days.map(d => Number(d.low)).filter(Number.isFinite);
+      if (!highs.length || highs.length !== days.length || lows.length !== days.length) { els.chart.innerHTML = ""; return; }
+      const all = highs.concat(lows); let min = Math.floor(Math.min(...all)-2), max = Math.ceil(Math.max(...all)+2); if (min === max) max += 1;
+      const W=900,H=280,left=54,right=28,top=32,bottom=48; const x=i=>left+i*((W-left-right)/Math.max(days.length-1,1)); const y=v=>top+(max-v)*((H-top-bottom)/(max-min));
+      const points=arr=>arr.map((v,i)=>`${x(i)},${y(v)}`).join(" ");
+      const grid=Array.from({length:4},(_,i)=>min+i*((max-min)/3)).map(v=>`<line x1="${left}" x2="${W-right}" y1="${y(v)}" y2="${y(v)}" stroke="rgba(160,190,220,.10)"/><text x="12" y="${y(v)+4}" fill="#7890a8" font-size="11">${Math.round(v)}°</text>`).join("");
+      const labels=days.map((d,i)=>`<text x="${x(i)}" y="${H-15}" text-anchor="middle" fill="#7890a8" font-size="11">${new Date(`${d.date}T12:00:00`).toLocaleDateString(undefined,{weekday:"short"})}</text>`).join("");
+      const dots=highs.map((v,i)=>`<circle cx="${x(i)}" cy="${y(v)}" r="4" fill="#ffd178"/><text x="${x(i)}" y="${y(v)-10}" text-anchor="middle" fill="#ffdba0" font-size="11" font-weight="700">${Math.round(v)}°</text>`).join("") + lows.map((v,i)=>`<circle cx="${x(i)}" cy="${y(v)}" r="4" fill="#63b6ff"/>`).join("");
+      els.chart.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="High and low temperature trend">${grid}<polyline points="${points(highs)}" fill="none" stroke="#ffd178" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><polyline points="${points(lows)}" fill="none" stroke="#63b6ff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>${dots}${labels}</svg>`;
     }
 
     function renderInsights(days) {
-      if (!days.length) { insightsEl.innerHTML = ""; return; }
-      const warmest = days.reduce((a,b) => b.high > a.high ? b : a);
-      const coolest = days.reduce((a,b) => b.low < a.low ? b : a);
-      const wet = days.filter(d => ["rain","heavyrain","lightrain","oshower","ishower","rainsnow","ts","tstorm"].includes(d.condition));
-      const stable = days.filter(d => ["clear","pcloudy"].includes(d.condition)).length;
-      const insightData = [
-        ["↗", "Warmest day", `${warmest.date.toLocaleDateString(undefined,{weekday:"long"})} peaks near ${formatTemp(warmest.high)}.`],
-        ["↘", "Coolest low", `${coolest.date.toLocaleDateString(undefined,{weekday:"long"})} falls near ${formatTemp(coolest.low)}.`],
-        [wet.length ? "☂" : "✓", wet.length ? "Wet-weather signal" : "Mostly dry signal", wet.length ? `${wet.length} of ${days.length} forecast days lean toward rain or showers.` : "No dominant rain condition appears in the daily summaries."],
-        ["◎", "Clearer days", `${stable} of ${days.length} days are dominated by clear or partly cloudy conditions.`]
+      if (!days.length) { els.insights.innerHTML = ""; return; }
+      const warmest = days.reduce((a,b)=>Number(b.high)>Number(a.high)?b:a);
+      const wettest = days.reduce((a,b)=>Number(b.rainChance||0)>Number(a.rainChance||0)?b:a);
+      const windiest = days.reduce((a,b)=>Number(b.wind||0)>Number(a.wind||0)?b:a);
+      const clearest = days.filter(d=>[0,1,2].includes(Number(d.code))).length;
+      const dayName = d => new Date(`${d.date}T12:00:00`).toLocaleDateString(undefined,{weekday:"long"});
+      const windUnit = unit === "fahrenheit" ? "mph" : "km/h";
+      const data = [
+        ["↗","Warmest day",`${dayName(warmest)} reaches about ${formatTemp(warmest.high)}.`],
+        ["☂","Highest rain risk",`${dayName(wettest)} has up to ${formatPct(wettest.rainChance)} precipitation probability.`],
+        ["〰","Windiest day",`${dayName(windiest)} peaks near ${Math.round(Number(windiest.wind)||0)} ${windUnit}.`],
+        ["◎","Clearer days",`${clearest} of ${days.length} days are clear, mainly clear, or partly cloudy.`]
       ];
-      insightsEl.innerHTML = insightData.map(([icon,title,copy]) => `<div class="insight"><div class="insight-icon" aria-hidden="true">${icon}</div><div><strong>${title}</strong><span>${copy}</span></div></div>`).join("");
+      els.insights.innerHTML = data.map(([icon,title,copy])=>`<div class="insight"><div class="insight-icon" aria-hidden="true">${icon}</div><div><strong>${title}</strong><span>${copy}</span></div></div>`).join("");
     }
 
     function renderLoading() {
-      forecastGrid.innerHTML = Array.from({length:7}, () => `<div class="forecast-card"><div class="skeleton" style="height:14px;width:46px"></div><div class="skeleton" style="height:11px;width:60px;margin-top:8px"></div><div class="skeleton" style="height:46px;width:46px;margin:22px 0 16px"></div><div class="skeleton" style="height:30px"></div><div class="skeleton" style="height:22px;width:72px;margin-top:14px"></div></div>`).join("");
-      chartEl.innerHTML = `<div class="skeleton" style="position:absolute;inset:18px"></div>`;
+      els.forecastGrid.innerHTML = Array.from({length:7},()=>`<div class="forecast-card"><div class="skeleton" style="height:14px;width:46px"></div><div class="skeleton" style="height:11px;width:60px;margin-top:8px"></div><div class="skeleton" style="height:48px;width:48px;margin:18px 0 14px"></div><div class="skeleton" style="height:30px"></div><div class="skeleton" style="height:22px;width:72px;margin-top:12px"></div></div>`).join("");
+      els.chart.innerHTML = `<div class="skeleton" style="position:absolute;inset:18px"></div>`;
     }
 
     async function loadForecast() {
-      const city = CITIES[Number(citySelect.value)];
-      showStatus(`Updating forecast for ${city.name}…`);
-      renderLoading();
-      refreshBtn.disabled = true;
+      const sequence = ++loadSequence;
+      if (activeController) activeController.abort();
+      activeController = new AbortController();
+      const city = CITIES[Number(els.city.value)];
+      showStatus(`Updating live forecast for ${city.name}…`); renderLoading(); els.refreshBtn.disabled = true;
       try {
-        const response = await fetch(fetchURL(city), {cache:"no-store"});
+        const response = await fetch(buildURL(city), {cache:"no-store",signal:activeController.signal});
         if (!response.ok) throw new Error(`Weather service returned ${response.status}`);
-        const api = await response.json();
-        if (!Array.isArray(api.dataseries) || !api.dataseries.length) throw new Error("Forecast data is unavailable");
-        const days = groupDaily(api);
-        renderHero(city, api, days); renderForecast(days); renderMetrics(api, days); renderChart(days); renderInsights(days);
-        document.getElementById("lastUpdated").textContent = `Updated ${new Date().toLocaleTimeString([], {hour:"numeric", minute:"2-digit"})}`;
+        const api = await response.json(); if (sequence !== loadSequence) return;
+        const data = normalize(api);
+        renderHero(city,data); renderMetrics(data); renderForecast(data.days); renderChart(data.days); renderInsights(data.days);
+        els.lastUpdated.textContent = `Updated ${String(data.current.time || "").replace("T"," ")}${data.timezoneAbbr ? ` ${data.timezoneAbbr}` : ""}`;
         showStatus("");
       } catch (error) {
-        console.error(error);
-        showStatus("SkyCast could not load live forecast data. Please retry in a moment.", true);
-        forecastGrid.innerHTML = `<div style="grid-column:1/-1;color:#8fa4bb;padding:22px 0">Live forecast cards are temporarily unavailable.</div>`;
-        chartEl.innerHTML = ""; insightsEl.innerHTML = "";
-      } finally { refreshBtn.disabled = false; }
+        if (error.name === "AbortError") return;
+        console.error(error); showStatus("SkyCast could not load live weather data. Please retry in a moment.",true);
+        els.forecastGrid.innerHTML = `<div style="grid-column:1/-1;color:#8fa4bb;padding:22px 0">Live forecast cards are temporarily unavailable.</div>`; els.chart.innerHTML = ""; els.insights.innerHTML = "";
+      } finally { if (sequence === loadSequence) els.refreshBtn.disabled = false; }
     }
 
-    citySelect.addEventListener("change", () => { localStorage.setItem("skycastCity", citySelect.value); loadForecast(); });
-    unitC.addEventListener("click", () => { unit = "metric"; localStorage.setItem("skycastUnit", unit); syncUnitButtons(); loadForecast(); });
-    unitF.addEventListener("click", () => { unit = "british"; localStorage.setItem("skycastUnit", unit); syncUnitButtons(); loadForecast(); });
-    refreshBtn.addEventListener("click", loadForecast);
-
-    loadForecast();
+    els.city.addEventListener("change",()=>{ localStorage.setItem("skycastCity",els.city.value); loadForecast(); });
+    els.unitC.addEventListener("click",()=>{ unit="celsius"; localStorage.setItem("skycastUnit",unit); syncUnitButtons(); loadForecast(); });
+    els.unitF.addEventListener("click",()=>{ unit="fahrenheit"; localStorage.setItem("skycastUnit",unit); syncUnitButtons(); loadForecast(); });
+    els.refreshBtn.addEventListener("click",loadForecast);
+    syncUnitButtons(); loadForecast();
   </script>
 </body>
 </html>
