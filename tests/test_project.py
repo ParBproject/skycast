@@ -11,7 +11,6 @@ class DashboardParser(HTMLParser):
         super().__init__()
         self.ids = set()
         self.local_refs = set()
-        self.title_seen = False
         self.meta_description = None
 
     def handle_starttag(self, tag, attrs):
@@ -31,25 +30,34 @@ class SkyCastProjectTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.index = (ROOT / "index.html").read_text(encoding="utf-8")
+        cls.app = (ROOT / "app.js").read_text(encoding="utf-8")
+        cls.core = (ROOT / "src" / "forecast-core.js").read_text(encoding="utf-8")
         cls.readme = (ROOT / "README.md").read_text(encoding="utf-8")
         cls.parser = DashboardParser()
         cls.parser.feed(cls.index)
 
     def test_dashboard_has_expected_live_regions(self):
         required = {
-            "city", "refreshBtn", "status", "currentCondition", "currentTemp",
-            "forecastGrid", "chart", "insights", "humidityMetric", "windMetric",
-            "rainMetric", "sunsetMetric", "timezoneLabel",
+            "city", "refreshBtn", "installBtn", "status", "connectionPill",
+            "currentCondition", "currentTemp", "hourlyGrid", "forecastGrid",
+            "chart", "insights", "humidityMetric", "windMetric", "rainMetric",
+            "sunsetMetric", "timezoneLabel", "cacheLabel",
         }
         self.assertTrue(required.issubset(self.parser.ids), required - self.parser.ids)
 
+    def test_application_is_modular(self):
+        self.assertIn('href="styles.css"', self.index)
+        self.assertIn('src="src/forecast-core.js"', self.index)
+        self.assertIn('src="app.js"', self.index)
+        self.assertNotIn("<style>", self.index)
+        self.assertNotRegex(self.index, r"<script>\s*const CITIES")
+
     def test_open_meteo_is_the_weather_provider(self):
-        app = self.index.lower()
-        readme = self.readme.lower()
-        self.assertIn("open-meteo", app)
-        self.assertIn("api.open-meteo.com/v1/forecast", app)
-        self.assertNotIn("7timer", app)
-        self.assertIn("open-meteo", readme)
+        production = (self.index + self.app + self.core).lower()
+        self.assertIn("open-meteo", production)
+        self.assertIn("api.open-meteo.com/v1/forecast", production)
+        self.assertNotIn("7timer", production)
+        self.assertIn("open-meteo", self.readme.lower())
 
     def test_all_local_html_references_exist(self):
         missing = []
@@ -64,16 +72,28 @@ class SkyCastProjectTests(unittest.TestCase):
     def test_all_four_condition_artworks_exist(self):
         for theme in ("clear", "cloud", "rain", "snow"):
             self.assertTrue((ROOT / f"assets/hero-{theme}.svg").is_file())
-            self.assertIn(f"assets/hero-${{theme}}.svg", self.index)
+        self.assertIn("assets/hero-${theme}.svg", self.app)
 
     def test_city_catalog_remains_complete(self):
-        city_names = re.findall(r'\{name:"([^"]+)",lat:', self.index)
+        city_names = re.findall(r'\{name:"([^"]+)",lat:', self.app)
         self.assertEqual(len(city_names), 22)
         self.assertEqual(len(city_names), len(set(city_names)))
 
     def test_readme_preview_assets_exist(self):
         for ref in re.findall(r'<img src="([^"]+)"', self.readme):
             self.assertTrue((ROOT / ref).is_file(), ref)
+
+    def test_pwa_files_and_offline_contract_exist(self):
+        manifest = ROOT / "manifest.webmanifest"
+        worker = ROOT / "sw.js"
+        icon = ROOT / "assets" / "app-icon.svg"
+        self.assertTrue(manifest.is_file())
+        self.assertTrue(worker.is_file())
+        self.assertTrue(icon.is_file())
+        self.assertIn('rel="manifest" href="manifest.webmanifest"', self.index)
+        self.assertIn('serviceWorker.register("./sw.js")', self.app)
+        self.assertIn("isCacheFresh", self.app)
+        self.assertIn("CACHE_TTL_MS", self.core)
 
     def test_metadata_is_present(self):
         self.assertIsNotNone(self.parser.meta_description)

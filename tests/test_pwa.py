@@ -10,6 +10,8 @@ class SkyCastPwaTests(unittest.TestCase):
     @classmethod
     def setUpClass(cls):
         cls.index = (ROOT / "index.html").read_text(encoding="utf-8")
+        cls.app = (ROOT / "app.js").read_text(encoding="utf-8")
+        cls.core = (ROOT / "src" / "forecast-core.js").read_text(encoding="utf-8")
         cls.worker = (ROOT / "sw.js").read_text(encoding="utf-8")
         cls.manifest = json.loads((ROOT / "manifest.webmanifest").read_text(encoding="utf-8"))
 
@@ -25,28 +27,31 @@ class SkyCastPwaTests(unittest.TestCase):
         for icon in self.manifest["icons"]:
             self.assertTrue((ROOT / icon["src"]).is_file(), icon["src"])
 
-    def test_index_registers_pwa_and_install_prompt(self):
+    def test_app_registers_pwa_and_install_prompt(self):
         self.assertIn('rel="manifest" href="manifest.webmanifest"', self.index)
-        self.assertIn('navigator.serviceWorker.register("./sw.js")', self.index)
-        self.assertIn('"beforeinstallprompt"', self.index)
+        self.assertIn('navigator.serviceWorker.register("./sw.js")', self.app)
+        self.assertIn('"beforeinstallprompt"', self.app)
         self.assertIn('id="installBtn"', self.index)
 
     def test_hourly_forecast_is_requested_and_rendered(self):
-        self.assertIn('hourly:"temperature_2m,apparent_temperature,precipitation_probability,weather_code,wind_speed_10m,is_day"', self.index)
+        self.assertIn('hourly:"temperature_2m,apparent_temperature,precipitation_probability,weather_code,wind_speed_10m,is_day"', self.core)
         self.assertIn('id="hourlyGrid"', self.index)
-        self.assertIn("function renderHourly", self.index)
-        self.assertIn("start+12", self.index)
+        self.assertIn("function renderHourly", self.app)
+        self.assertIn("start+12", self.core)
 
     def test_last_known_forecast_cache_is_guarded_by_ttl(self):
-        self.assertIn("CACHE_TTL_MS", self.index)
-        self.assertIn("function saveCachedForecast", self.index)
-        self.assertIn("function readCachedForecast", self.index)
-        self.assertIn("Date.now()-cached.savedAt > CACHE_TTL_MS", self.index)
-        self.assertIn("showCachedOrUnavailable", self.index)
+        self.assertIn("CACHE_TTL_MS", self.core)
+        self.assertIn("function saveCachedForecast", self.app)
+        self.assertIn("function readCachedForecast", self.app)
+        self.assertIn("isCacheFresh", self.app)
+        self.assertIn("showCachedOrUnavailable", self.app)
 
     def test_service_worker_precaches_required_shell(self):
         required = {
             "./index.html",
+            "./styles.css",
+            "./app.js",
+            "./src/forecast-core.js",
             "./manifest.webmanifest",
             "./assets/app-icon.svg",
             "./assets/hero-clear.svg",

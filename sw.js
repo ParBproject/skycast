@@ -1,7 +1,10 @@
-const CACHE_VERSION = "skycast-shell-v3";
+const CACHE_VERSION = "skycast-shell-v4";
 const APP_SHELL = [
   "./",
   "./index.html",
+  "./styles.css",
+  "./app.js",
+  "./src/forecast-core.js",
   "./manifest.webmanifest",
   "./assets/app-icon.svg",
   "./assets/hero-clear.svg",
