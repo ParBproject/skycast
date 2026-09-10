@@ -50,8 +50,10 @@ class SkyCastPwaTests(unittest.TestCase):
         required = {
             "./index.html",
             "./styles.css",
+            "./styles/location.css",
             "./app.js",
             "./src/forecast-core.js",
+            "./src/location-core.js",
             "./manifest.webmanifest",
             "./assets/app-icon.svg",
             "./assets/hero-clear.svg",
