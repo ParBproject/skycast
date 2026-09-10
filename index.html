@@ -4,11 +4,12 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#07111f">
-  <meta name="description" content="SkyCast is an installable weather intelligence dashboard with global location search, live current conditions, hourly outlooks, and seven-day Open-Meteo forecasts.">
+  <meta name="description" content="SkyCast is an installable weather intelligence dashboard with global location search, live conditions, air quality, hourly outlooks, and seven-day Open-Meteo forecasts.">
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="icon" href="assets/app-icon.svg" type="image/svg+xml">
   <link rel="stylesheet" href="styles.css">
   <link rel="stylesheet" href="styles/location.css">
+  <link rel="stylesheet" href="styles/air-quality.css">
   <title>SkyCast — Weather Intelligence Dashboard</title>
 </head>
 <body>
@@ -38,9 +39,9 @@
         <section class="hero" aria-labelledby="hero-title">
           <div class="hero-content">
             <div>
-              <p class="eyebrow">Live weather • global search • hourly + 7-day planning</p>
+              <p class="eyebrow">Live weather • global search • atmospheric intelligence</p>
               <h1 id="hero-title">Weather intelligence, <span>wherever you need it.</span></h1>
-              <p class="hero-sub">Search any city or postal code, use your current location, and save favorites while keeping the fast hourly, weekly, offline, and installable SkyCast experience.</p>
+              <p class="hero-sub">Search any city or postal code, use your current location, and combine live weather with air-quality, UV, pollen, hourly, weekly, offline, and installable planning.</p>
             </div>
             <div>
               <div class="control-row">
@@ -87,6 +88,27 @@
           </div>
         </section>
 
+        <section id="airPanel" class="panel panel-pad" aria-labelledby="air-title">
+          <div class="panel-head"><div><h2 id="air-title" class="panel-title">Air quality & exposure</h2><p class="panel-copy">Current atmospheric conditions from CAMS through Open-Meteo, including European AQI, particles, UV and seasonal pollen.</p></div><span id="airUpdated" class="last-updated">Waiting for atmospheric data</span></div>
+          <div class="air-layout">
+            <div class="air-summary">
+              <div class="air-kicker">European Air Quality Index</div>
+              <div class="air-score-row"><strong id="aqiScore" class="air-score">—</strong><span id="aqiLevel" class="air-level" data-tone="unknown">Loading</span></div>
+              <p id="aqiAdvice" class="air-advice">Loading atmospheric conditions…</p>
+              <div id="aqiDriver" class="air-driver">Assessing dominant pollutant</div>
+            </div>
+            <div class="air-metrics">
+              <div class="air-metric"><span>PM2.5</span><strong id="pm25Metric">—</strong><small>Fine particulate matter</small></div>
+              <div class="air-metric"><span>PM10</span><strong id="pm10Metric">—</strong><small>Coarse particulate matter</small></div>
+              <div class="air-metric"><span>UV index</span><strong id="uvMetric">—</strong><small id="uvDetail">UV exposure</small></div>
+              <div class="air-metric"><span>Ozone</span><strong id="ozoneMetric">—</strong><small>Ground-level O₃</small></div>
+              <div class="air-metric"><span>Pollen</span><strong id="pollenMetric">—</strong><small id="pollenDetail">Seasonal data where available</small></div>
+            </div>
+          </div>
+          <p class="air-note">Pollen variables are available only in Europe during pollen season. Air-quality guidance is informational and does not replace local public-health advice.</p>
+          <div id="airStatus" class="air-status" role="status" aria-live="polite"></div>
+        </section>
+
         <section class="panel panel-pad" aria-label="Next twelve hours">
           <div class="panel-head"><div><h2 class="panel-title">Next 12 hours</h2><p class="panel-copy">Temperature, condition, precipitation probability, and wind by hour.</p></div><span id="cacheLabel" class="last-updated">Live model data</span></div>
           <div id="hourlyGrid" class="hourly-grid"></div>
@@ -115,12 +137,14 @@
   <footer>
     <div class="app-shell footer-inner">
       <span>© <span id="year"></span> SkyCast. Installable client-side weather dashboard.</span>
-      <span>Weather: <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a> • Location search: GeoNames via Open-Meteo • Offline shell + cached last-known forecast</span>
+      <span>Weather & geocoding: <a href="https://open-meteo.com/" target="_blank" rel="noopener">Open-Meteo</a> • Air quality: CAMS ENSEMBLE via Open-Meteo • Offline shell + cached last-known data</span>
     </div>
   </footer>
 
   <script src="src/forecast-core.js"></script>
   <script src="src/location-core.js"></script>
+  <script src="src/air-quality-core.js"></script>
+  <script src="air-quality.js"></script>
   <script src="app.js"></script>
 </body>
 </html>
