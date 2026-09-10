@@ -1,6 +1,6 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1440 900" role="img" aria-labelledby="title desc">
-<title id="title">SkyCast 2026 PWA dashboard preview</title>
-<desc id="desc">A polished dark European weather dashboard with live conditions, current metrics, and a next twelve hours forecast.</desc>
+<title id="title">SkyCast searchable weather dashboard preview</title>
+<desc id="desc">A polished dark weather intelligence dashboard with global search, favorites, sharing, live conditions and a next twelve hours forecast.</desc>
 <defs>
   <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#06101c"/><stop offset="1" stop-color="#0b1c2e"/></linearGradient>
   <linearGradient id="hero" x1="0" y1="0" x2="1" y2="1"><stop stop-color="#112943"/><stop offset="1" stop-color="#071523"/></linearGradient>
@@ -13,25 +13,35 @@
   <g transform="translate(72 34)">
     <rect width="42" height="42" rx="14" fill="url(#accent)"/>
     <path d="M10 28h22a8 8 0 0 0 0-16 11 11 0 0 0-21 4 6 6 0 0 0-1 12Z" fill="none" stroke="white" stroke-width="2"/>
-    <text x="58" y="22" font-size="20" font-weight="800">SkyCast</text><text x="58" y="39" font-size="9" fill="#8fa4bb" letter-spacing="1.5">EUROPEAN WEATHER INTELLIGENCE</text>
-    <g transform="translate(1000 2)"><rect width="112" height="36" rx="18" fill="#0f2a28" stroke="#75e6b0" stroke-opacity=".25"/><circle cx="18" cy="18" r="5" fill="#75e6b0"/><text x="31" y="22" font-size="10" font-weight="700" fill="#c9f9e2">LIVE FORECAST</text></g>
-    <g transform="translate(1122 2)"><rect width="102" height="36" rx="11" fill="#102237" stroke="#63b6ff" stroke-opacity=".35"/><text x="22" y="22" font-size="10" font-weight="700" fill="#dff1ff">INSTALL APP</text></g>
+    <text x="58" y="22" font-size="20" font-weight="800">SkyCast</text><text x="58" y="39" font-size="9" fill="#8fa4bb" letter-spacing="1.5">WEATHER INTELLIGENCE</text>
+    <g transform="translate(930 2)"><rect width="112" height="36" rx="18" fill="#0f2a28" stroke="#75e6b0" stroke-opacity=".25"/><circle cx="18" cy="18" r="5" fill="#75e6b0"/><text x="31" y="22" font-size="10" font-weight="700" fill="#c9f9e2">LIVE FORECAST</text></g>
+    <g transform="translate(1052 2)"><rect width="74" height="36" rx="11" fill="#102237" stroke="#63b6ff" stroke-opacity=".28"/><text x="20" y="22" font-size="10" font-weight="700" fill="#dff1ff">SHARE</text></g>
+    <g transform="translate(1136 2)"><rect width="102" height="36" rx="11" fill="#102237" stroke="#63b6ff" stroke-opacity=".35"/><text x="22" y="22" font-size="10" font-weight="700" fill="#dff1ff">INSTALL APP</text></g>
   </g>
 
   <g transform="translate(72 100)" filter="url(#shadow)">
-    <rect width="1296" height="330" rx="28" fill="url(#hero)" stroke="#29415a" stroke-opacity=".6"/>
-    <text x="42" y="50" fill="#83c9ff" font-size="12" font-weight="800" letter-spacing="2">LIVE WEATHER • HOURLY + 7-DAY PLANNING</text>
-    <text x="42" y="112" font-size="44" font-weight="800">Weather intelligence for Europe,</text><text x="42" y="160" fill="#77c5ff" font-size="44" font-weight="800">at a glance.</text>
-    <text x="42" y="202" fill="#b8c8d9" font-size="14">Current conditions, the next 12 hours, precipitation risk, wind and daylight details.</text>
-    <rect x="42" y="244" width="300" height="48" rx="14" fill="#071421" stroke="#29415a"/><text x="60" y="274" font-size="13">London, UK</text>
-    <rect x="354" y="244" width="118" height="48" rx="14" fill="#071421" stroke="#29415a"/><rect x="359" y="249" width="53" height="38" rx="10" fill="#eef7ff"/><text x="377" y="274" font-size="12" font-weight="800" fill="#071421">°C</text><text x="432" y="274" font-size="12" fill="#8fa4bb">°F</text>
+    <rect width="1296" height="382" rx="28" fill="url(#hero)" stroke="#29415a" stroke-opacity=".6"/>
+    <text x="42" y="48" fill="#83c9ff" font-size="11" font-weight="800" letter-spacing="1.8">LIVE WEATHER • GLOBAL SEARCH • HOURLY + 7-DAY</text>
+    <text x="42" y="105" font-size="42" font-weight="800">Weather intelligence,</text><text x="42" y="151" fill="#77c5ff" font-size="42" font-weight="800">wherever you need it.</text>
+    <text x="42" y="190" fill="#b8c8d9" font-size="13">Search any city or postal code, use your location, save favorites and share a forecast.</text>
+
+    <rect x="42" y="222" width="292" height="44" rx="13" fill="#071421" stroke="#29415a"/><text x="58" y="249" font-size="12">London, UK</text><text x="308" y="249" font-size="13" fill="#8fa4bb">⌄</text>
+    <rect x="346" y="222" width="112" height="44" rx="13" fill="#071421" stroke="#29415a"/><rect x="351" y="227" width="49" height="34" rx="9" fill="#eef7ff"/><text x="368" y="249" font-size="11" font-weight="800" fill="#071421">°C</text><text x="419" y="249" font-size="11" fill="#8fa4bb">°F</text>
+
+    <rect x="42" y="278" width="356" height="44" rx="13" fill="#071421" stroke="#4a7398"/><text x="58" y="305" font-size="11" fill="#8197ac">Search city or postal code</text><rect x="323" y="283" width="70" height="34" rx="9" fill="#143353"/><text x="340" y="305" font-size="10" font-weight="700">SEARCH</text>
+    <rect x="410" y="278" width="134" height="44" rx="13" fill="#0c1d30" stroke="#29415a"/><text x="427" y="305" font-size="10" font-weight="700">⌖ USE MY LOCATION</text>
+    <rect x="556" y="278" width="94" height="44" rx="13" fill="#2b2617" stroke="#ffd178" stroke-opacity=".3"/><text x="574" y="305" font-size="10" font-weight="700" fill="#ffe8b7">★ SAVED</text>
+
+    <text x="42" y="348" font-size="9" font-weight="800" fill="#8fa4bb" letter-spacing="1">FAVORITES</text>
+    <g transform="translate(108 329)"><rect width="92" height="30" rx="15" fill="#102237" stroke="#29415a"/><text x="15" y="19" font-size="9">Paris</text><rect x="102" width="98" height="30" rx="15" fill="#102237" stroke="#29415a"/><text x="116" y="19" font-size="9">Toronto</text><rect x="210" width="94" height="30" rx="15" fill="#102237" stroke="#29415a"/><text x="225" y="19" font-size="9">Berlin</text></g>
+
     <g transform="translate(720 0)">
-      <rect width="576" height="330" rx="28" fill="url(#sky)"/><circle cx="430" cy="80" r="56" fill="#ffd76e"/><path d="M0 250 80 205 150 238 225 180 310 242 390 206 470 244 576 194V330H0Z" fill="#143d68" opacity=".68"/><path d="M0 284h576v46H0Z" fill="#081d34" opacity=".9"/>
-      <rect x="230" y="200" width="310" height="104" rx="20" fill="#071421" fill-opacity=".8" stroke="#d9f0ff" stroke-opacity=".2"/><text x="252" y="227" font-size="9" fill="#a9bdd0" letter-spacing="1">CURRENT CONDITIONS</text><text x="252" y="258" font-size="18" font-weight="700">Partly cloudy</text><text x="470" y="261" font-size="42" font-weight="800">18°</text><line x1="252" y1="272" x2="518" y2="272" stroke="#fff" stroke-opacity=".12"/><text x="252" y="292" font-size="10" fill="#c8d7e6">London, UK</text><text x="438" y="292" font-size="10" fill="#c8d7e6">10:00 BST</text>
+      <rect width="576" height="382" rx="28" fill="url(#sky)"/><circle cx="432" cy="84" r="56" fill="#ffd76e"/><path d="M0 292 80 230 150 265 225 196 310 274 390 224 470 271 576 214V382H0Z" fill="#143d68" opacity=".68"/><path d="M0 326h576v56H0Z" fill="#081d34" opacity=".9"/>
+      <rect x="222" y="232" width="318" height="118" rx="20" fill="#071421" fill-opacity=".82" stroke="#d9f0ff" stroke-opacity=".2"/><text x="246" y="260" font-size="9" fill="#a9bdd0" letter-spacing="1">CURRENT CONDITIONS</text><text x="246" y="293" font-size="18" font-weight="700">Partly cloudy</text><text x="467" y="296" font-size="43" font-weight="800">18°</text><line x1="246" y1="309" x2="516" y2="309" stroke="#fff" stroke-opacity=".12"/><text x="246" y="332" font-size="10" fill="#c8d7e6">London, UK</text><text x="438" y="332" font-size="10" fill="#c8d7e6">10:00 BST</text>
     </g>
   </g>
 
-  <g transform="translate(72 454)">
+  <g transform="translate(72 506)">
     <rect width="1296" height="142" rx="20" fill="#0c1a2a" stroke="#29415a" stroke-opacity=".55"/>
     <text x="24" y="34" font-size="18" font-weight="700">Current conditions</text><text x="1095" y="34" font-size="10" fill="#8fa4bb">UPDATED 10:00 BST</text>
     <g transform="translate(22 58)">
@@ -44,18 +54,18 @@
     </g>
   </g>
 
-  <g transform="translate(72 620)">
-    <rect width="1296" height="224" rx="20" fill="#0c1a2a" stroke="#29415a" stroke-opacity=".55"/>
+  <g transform="translate(72 672)">
+    <rect width="1296" height="172" rx="20" fill="#0c1a2a" stroke="#29415a" stroke-opacity=".55"/>
     <text x="24" y="34" font-size="18" font-weight="700">Next 12 hours</text><text x="24" y="54" font-size="10" fill="#8fa4bb">Temperature, conditions, rain probability and wind by hour.</text><text x="1148" y="34" font-size="10" fill="#8fa4bb">LIVE MODEL DATA</text>
-    <g transform="translate(22 78)">
-      <g><rect width="142" height="120" rx="15" fill="#102237"/><text x="14" y="22" font-size="11" font-weight="700">Now</text><text x="14" y="56" font-size="23">⛅</text><text x="14" y="83" font-size="20" font-weight="800">18°</text><text x="14" y="103" font-size="9" fill="#8fa4bb">Rain 18% • 13 km/h</text></g>
-      <g transform="translate(152)"><rect width="142" height="120" rx="15" fill="#102237"/><text x="14" y="22" font-size="11" font-weight="700">11:00 AM</text><text x="14" y="56" font-size="23">⛅</text><text x="14" y="83" font-size="20" font-weight="800">19°</text><text x="14" y="103" font-size="9" fill="#8fa4bb">Rain 20% • 14 km/h</text></g>
-      <g transform="translate(304)"><rect width="142" height="120" rx="15" fill="#102237"/><text x="14" y="22" font-size="11" font-weight="700">12:00 PM</text><text x="14" y="56" font-size="23">🌤</text><text x="14" y="83" font-size="20" font-weight="800">20°</text><text x="14" y="103" font-size="9" fill="#8fa4bb">Rain 12% • 15 km/h</text></g>
-      <g transform="translate(456)"><rect width="142" height="120" rx="15" fill="#102237"/><text x="14" y="22" font-size="11" font-weight="700">1:00 PM</text><text x="14" y="56" font-size="23">☀</text><text x="14" y="83" font-size="20" font-weight="800">21°</text><text x="14" y="103" font-size="9" fill="#8fa4bb">Rain 8% • 14 km/h</text></g>
-      <g transform="translate(608)"><rect width="142" height="120" rx="15" fill="#102237"/><text x="14" y="22" font-size="11" font-weight="700">2:00 PM</text><text x="14" y="56" font-size="23">☀</text><text x="14" y="83" font-size="20" font-weight="800">21°</text><text x="14" y="103" font-size="9" fill="#8fa4bb">Rain 7% • 13 km/h</text></g>
-      <g transform="translate(760)"><rect width="142" height="120" rx="15" fill="#102237"/><text x="14" y="22" font-size="11" font-weight="700">3:00 PM</text><text x="14" y="56" font-size="23">⛅</text><text x="14" y="83" font-size="20" font-weight="800">20°</text><text x="14" y="103" font-size="9" fill="#8fa4bb">Rain 15% • 12 km/h</text></g>
-      <g transform="translate(912)"><rect width="142" height="120" rx="15" fill="#102237"/><text x="14" y="22" font-size="11" font-weight="700">4:00 PM</text><text x="14" y="56" font-size="23">🌦</text><text x="14" y="83" font-size="20" font-weight="800">19°</text><text x="14" y="103" font-size="9" fill="#8fa4bb">Rain 31% • 11 km/h</text></g>
-      <g transform="translate(1064)"><rect width="188" height="120" rx="15" fill="#102237"/><text x="14" y="22" font-size="11" font-weight="700">5:00 PM</text><text x="14" y="56" font-size="23">🌦</text><text x="14" y="83" font-size="20" font-weight="800">18°</text><text x="14" y="103" font-size="9" fill="#8fa4bb">More hourly data →</text></g>
+    <g transform="translate(22 76)">
+      <g><rect width="142" height="76" rx="15" fill="#102237"/><text x="14" y="22" font-size="10" font-weight="700">Now</text><text x="14" y="50" font-size="20">⛅</text><text x="54" y="50" font-size="18" font-weight="800">18°</text><text x="96" y="49" font-size="8" fill="#8fa4bb">18%</text></g>
+      <g transform="translate(152)"><rect width="142" height="76" rx="15" fill="#102237"/><text x="14" y="22" font-size="10" font-weight="700">11 AM</text><text x="14" y="50" font-size="20">⛅</text><text x="54" y="50" font-size="18" font-weight="800">19°</text><text x="96" y="49" font-size="8" fill="#8fa4bb">20%</text></g>
+      <g transform="translate(304)"><rect width="142" height="76" rx="15" fill="#102237"/><text x="14" y="22" font-size="10" font-weight="700">12 PM</text><text x="14" y="50" font-size="20">🌤</text><text x="54" y="50" font-size="18" font-weight="800">20°</text><text x="96" y="49" font-size="8" fill="#8fa4bb">12%</text></g>
+      <g transform="translate(456)"><rect width="142" height="76" rx="15" fill="#102237"/><text x="14" y="22" font-size="10" font-weight="700">1 PM</text><text x="14" y="50" font-size="20">☀</text><text x="54" y="50" font-size="18" font-weight="800">21°</text><text x="96" y="49" font-size="8" fill="#8fa4bb">8%</text></g>
+      <g transform="translate(608)"><rect width="142" height="76" rx="15" fill="#102237"/><text x="14" y="22" font-size="10" font-weight="700">2 PM</text><text x="14" y="50" font-size="20">☀</text><text x="54" y="50" font-size="18" font-weight="800">21°</text><text x="96" y="49" font-size="8" fill="#8fa4bb">7%</text></g>
+      <g transform="translate(760)"><rect width="142" height="76" rx="15" fill="#102237"/><text x="14" y="22" font-size="10" font-weight="700">3 PM</text><text x="14" y="50" font-size="20">⛅</text><text x="54" y="50" font-size="18" font-weight="800">20°</text><text x="96" y="49" font-size="8" fill="#8fa4bb">15%</text></g>
+      <g transform="translate(912)"><rect width="142" height="76" rx="15" fill="#102237"/><text x="14" y="22" font-size="10" font-weight="700">4 PM</text><text x="14" y="50" font-size="20">🌦</text><text x="54" y="50" font-size="18" font-weight="800">19°</text><text x="96" y="49" font-size="8" fill="#8fa4bb">31%</text></g>
+      <g transform="translate(1064)"><rect width="188" height="76" rx="15" fill="#102237"/><text x="14" y="22" font-size="10" font-weight="700">5 PM</text><text x="14" y="50" font-size="20">🌦</text><text x="54" y="50" font-size="18" font-weight="800">18°</text><text x="104" y="49" font-size="8" fill="#8fa4bb">MORE →</text></g>
     </g>
   </g>
 </g>
