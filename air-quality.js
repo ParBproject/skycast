@@ -15,6 +15,7 @@ const airEls = Object.fromEntries([
 let airController = null;
 let airSequence = 0;
 let currentAirLocation = null;
+let currentAirLocationKey = "";
 
 function formatConcentration(value) {
   return Number.isFinite(Number(value)) ? `${Math.round(Number(value))} µg/m³` : "—";
@@ -53,6 +54,7 @@ function setAirStatus(message,error=false) {
 function renderAirLoading() {
   airEls.aqiScore.textContent = "—";
   airEls.aqiLevel.textContent = "Updating";
+  airEls.aqiLevel.dataset.tone = "unknown";
   airEls.aqiAdvice.textContent = "Loading atmospheric conditions…";
   airEls.aqiDriver.textContent = "Assessing dominant pollutant";
   for (const id of ["pm25Metric","pm10Metric","uvMetric","ozoneMetric","pollenMetric"]) airEls[id].textContent = "—";
@@ -61,7 +63,7 @@ function renderAirLoading() {
   setAirStatus("");
 }
 
-function renderAirQuality(data,{cached=false,savedAt=null}={}) {
+function renderAirQuality(data,{cached=false}={}) {
   const score = Number.isFinite(Number(data.aqi)) ? Math.round(Number(data.aqi)) : "—";
   airEls.aqiScore.textContent = score;
   airEls.aqiLevel.textContent = data.aqiBand.label;
@@ -75,27 +77,31 @@ function renderAirQuality(data,{cached=false,savedAt=null}={}) {
   airEls.ozoneMetric.textContent = formatConcentration(data.ozone);
   airEls.pollenMetric.textContent = data.pollen ? `${Math.round(data.pollen.value)} grains/m³` : "—";
   airEls.pollenDetail.textContent = data.pollen ? `${data.pollen.label} is highest` : "Seasonal European pollen data may be unavailable";
-  airEls.airUpdated.textContent = cached && savedAt ? "Cached atmospheric data" : `Updated ${String(data.time || "").replace("T"," ")}${data.timezoneAbbr ? ` ${data.timezoneAbbr}` : ""}`;
+  airEls.airUpdated.textContent = cached ? "Cached atmospheric data" : `Updated ${String(data.time || "").replace("T"," ")}${data.timezoneAbbr ? ` ${data.timezoneAbbr}` : ""}`;
   setAirStatus(cached ? "Live air-quality data is unavailable; showing a recent cached reading." : "");
 }
 
 function showAirFallback(location,message) {
   const cached = readAirCache(location);
   if (cached) {
-    renderAirQuality(cached.data,{cached:true,savedAt:cached.savedAt});
+    renderAirQuality(cached.data,{cached:true});
     return;
   }
   setAirStatus(message,true);
   airEls.aqiScore.textContent = "—";
   airEls.aqiLevel.textContent = "Unavailable";
+  airEls.aqiLevel.dataset.tone = "unknown";
   airEls.aqiAdvice.textContent = "Atmospheric data could not be loaded for this location.";
   airEls.aqiDriver.textContent = "Weather forecast remains available separately.";
   airEls.airUpdated.textContent = "No recent air-quality data";
 }
 
-async function loadAirQuality(location) {
+async function loadAirQuality(location,{force=false}={}) {
   if (!location) return;
+  const nextKey = airQualityCacheKey(location);
   currentAirLocation = location;
+  if (!force && nextKey === currentAirLocationKey) return;
+  currentAirLocationKey = nextKey;
   const sequence = ++airSequence;
   if (airController) airController.abort();
   airController = new AbortController();
@@ -120,6 +126,19 @@ async function loadAirQuality(location) {
   }
 }
 
+function syncAirQualityFromURL({force=false}={}) {
+  const state = SkyCastLocations.parseShareQuery(window.location.search);
+  if (state?.location) loadAirQuality(state.location,{force});
+}
+
+const originalReplaceState = window.history.replaceState.bind(window.history);
+window.history.replaceState = function (...args) {
+  const result = originalReplaceState(...args);
+  syncAirQualityFromURL();
+  return result;
+};
+
 window.addEventListener("skycast:locationchange",event=>loadAirQuality(event.detail?.location));
-window.addEventListener("online",()=>{ if (currentAirLocation) loadAirQuality(currentAirLocation); });
+window.addEventListener("popstate",()=>syncAirQualityFromURL());
+window.addEventListener("online",()=>{ if (currentAirLocation) loadAirQuality(currentAirLocation,{force:true}); else syncAirQualityFromURL({force:true}); });
 window.addEventListener("offline",()=>{ if (currentAirLocation) showAirFallback(currentAirLocation,"Network connection lost."); });
