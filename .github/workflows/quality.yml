@@ -31,8 +31,13 @@ jobs:
         run: |
           node --check app.js
           node --check src/forecast-core.js
+          node --check src/location-core.js
           node --check sw.js
           node --check tests/forecast-core.test.js
+          node --check tests/location-core.test.js
 
       - name: Run forecast core unit tests
         run: node tests/forecast-core.test.js
+
+      - name: Run location core unit tests
+        run: node tests/location-core.test.js
