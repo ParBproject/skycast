@@ -1,12 +1,15 @@
-const CACHE_VERSION = "skycast-shell-v5";
+const CACHE_VERSION = "skycast-shell-v6";
 const APP_SHELL = [
   "./",
   "./index.html",
   "./styles.css",
   "./styles/location.css",
+  "./styles/air-quality.css",
   "./app.js",
+  "./air-quality.js",
   "./src/forecast-core.js",
   "./src/location-core.js",
+  "./src/air-quality-core.js",
   "./manifest.webmanifest",
   "./assets/app-icon.svg",
   "./assets/hero-clear.svg",
