@@ -1,0 +1,20 @@
+{
+  "name": "SkyCast — European Weather Intelligence",
+  "short_name": "SkyCast",
+  "description": "Live current conditions, hourly outlooks, and seven-day weather intelligence for major European cities.",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#06101c",
+  "theme_color": "#07111f",
+  "orientation": "any",
+  "categories": ["weather", "utilities"],
+  "icons": [
+    {
+      "src": "assets/app-icon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml",
+      "purpose": "any maskable"
+    }
+  ]
+}

@@ -1,0 +1,28 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 512 512" role="img" aria-labelledby="title desc">
+  <title id="title">SkyCast app icon</title>
+  <desc id="desc">A blue weather tile with a cloud and sun mark.</desc>
+  <defs>
+    <linearGradient id="bg" x1="48" y1="40" x2="456" y2="472" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#79c9ff"/>
+      <stop offset="0.58" stop-color="#2f8ee5"/>
+      <stop offset="1" stop-color="#174881"/>
+    </linearGradient>
+    <linearGradient id="cloud" x1="124" y1="198" x2="388" y2="354" gradientUnits="userSpaceOnUse">
+      <stop stop-color="#ffffff"/>
+      <stop offset="1" stop-color="#d9edff"/>
+    </linearGradient>
+  </defs>
+  <rect x="24" y="24" width="464" height="464" rx="122" fill="url(#bg)"/>
+  <circle cx="351" cy="163" r="62" fill="#ffd878"/>
+  <g fill="none" stroke="#ffe9a8" stroke-linecap="round" stroke-width="18">
+    <path d="M351 76v-28"/>
+    <path d="M351 278v-28"/>
+    <path d="M264 163h-28"/>
+    <path d="M466 163h-28"/>
+    <path d="m290 102-20-20"/>
+    <path d="m432 244-20-20"/>
+    <path d="m412 102 20-20"/>
+  </g>
+  <path d="M132 350h238c52 0 94-38 94-85 0-45-37-81-84-85-17-59-72-102-138-102-78 0-142 61-145 137-42 13-73 50-73 95 0 55 48 100 108 100Z" fill="url(#cloud)"/>
+  <path d="M132 350h238c52 0 94-38 94-85 0-45-37-81-84-85-17-59-72-102-138-102-78 0-142 61-145 137-42 13-73 50-73 95 0 55 48 100 108 100Z" fill="none" stroke="#b8daf6" stroke-width="12"/>
+</svg>

@@ -14,10 +14,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Check out repository
-        uses: actions/checkout@v4
+        uses: actions/checkout@v7
 
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.12"
 
@@ -26,3 +26,21 @@ jobs:
 
       - name: Run project regression checks
         run: python -m unittest discover -s tests -v
+
+      - name: Extract dashboard JavaScript
+        run: |
+          python - <<'PY'
+          from pathlib import Path
+          import re
+
+          html = Path("index.html").read_text(encoding="utf-8")
+          scripts = re.findall(r"<script>(.*?)</script>", html, flags=re.S)
+          if not scripts:
+              raise SystemExit("No inline dashboard script found")
+          Path("/tmp/skycast-dashboard.js").write_text("\n".join(scripts), encoding="utf-8")
+          PY
+
+      - name: Validate JavaScript syntax
+        run: |
+          node --check /tmp/skycast-dashboard.js
+          node --check sw.js
