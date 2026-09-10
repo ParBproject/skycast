@@ -32,30 +32,35 @@ class SkyCastProjectTests(unittest.TestCase):
         cls.index = (ROOT / "index.html").read_text(encoding="utf-8")
         cls.app = (ROOT / "app.js").read_text(encoding="utf-8")
         cls.core = (ROOT / "src" / "forecast-core.js").read_text(encoding="utf-8")
+        cls.location_core = (ROOT / "src" / "location-core.js").read_text(encoding="utf-8")
         cls.readme = (ROOT / "README.md").read_text(encoding="utf-8")
         cls.parser = DashboardParser()
         cls.parser.feed(cls.index)
 
     def test_dashboard_has_expected_live_regions(self):
         required = {
-            "city", "refreshBtn", "installBtn", "status", "connectionPill",
+            "city", "refreshBtn", "installBtn", "shareBtn", "status", "connectionPill",
             "currentCondition", "currentTemp", "hourlyGrid", "forecastGrid",
             "chart", "insights", "humidityMetric", "windMetric", "rainMetric",
-            "sunsetMetric", "timezoneLabel", "cacheLabel",
+            "sunsetMetric", "timezoneLabel", "cacheLabel", "locationSearchForm",
+            "locationQuery", "locationResults", "geoBtn", "favoriteBtn", "favoritesRow",
         }
         self.assertTrue(required.issubset(self.parser.ids), required - self.parser.ids)
 
     def test_application_is_modular(self):
         self.assertIn('href="styles.css"', self.index)
+        self.assertIn('href="styles/location.css"', self.index)
         self.assertIn('src="src/forecast-core.js"', self.index)
+        self.assertIn('src="src/location-core.js"', self.index)
         self.assertIn('src="app.js"', self.index)
         self.assertNotIn("<style>", self.index)
         self.assertNotRegex(self.index, r"<script>\s*const CITIES")
 
     def test_open_meteo_is_the_weather_provider(self):
-        production = (self.index + self.app + self.core).lower()
+        production = (self.index + self.app + self.core + self.location_core).lower()
         self.assertIn("open-meteo", production)
         self.assertIn("api.open-meteo.com/v1/forecast", production)
+        self.assertIn("geocoding-api.open-meteo.com/v1/search", production)
         self.assertNotIn("7timer", production)
         self.assertIn("open-meteo", self.readme.lower())
 
@@ -74,10 +79,18 @@ class SkyCastProjectTests(unittest.TestCase):
             self.assertTrue((ROOT / f"assets/hero-{theme}.svg").is_file())
         self.assertIn("assets/hero-${theme}.svg", self.app)
 
-    def test_city_catalog_remains_complete(self):
-        city_names = re.findall(r'\{name:"([^"]+)",lat:', self.app)
+    def test_curated_city_catalog_remains_complete(self):
+        city_names = re.findall(r'\{name:"([^"]+)",lat:', self.location_core)
         self.assertEqual(len(city_names), 22)
         self.assertEqual(len(city_names), len(set(city_names)))
+
+    def test_location_features_remain_wired(self):
+        self.assertIn("buildGeocodingURL", self.app)
+        self.assertIn("navigator.geolocation.getCurrentPosition", self.app)
+        self.assertIn("toggleFavorite", self.app)
+        self.assertIn("buildShareQuery", self.app)
+        self.assertIn("parseShareQuery", self.app)
+        self.assertIn("navigator.share", self.app)
 
     def test_readme_preview_assets_exist(self):
         for ref in re.findall(r'<img src="([^"]+)"', self.readme):
@@ -98,7 +111,7 @@ class SkyCastProjectTests(unittest.TestCase):
     def test_metadata_is_present(self):
         self.assertIsNotNone(self.parser.meta_description)
         self.assertGreater(len(self.parser.meta_description or ""), 40)
-        self.assertIn("<title>SkyCast — European Weather Dashboard</title>", self.index)
+        self.assertIn("<title>SkyCast — Weather Intelligence Dashboard</title>", self.index)
 
     def test_legacy_page_routes_to_main_dashboard(self):
         legacy = (ROOT / "european_weather_forecast.html").read_text(encoding="utf-8")
