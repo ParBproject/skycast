@@ -1,5 +1,12 @@
 # SkyCast — Weather Intelligence Dashboard
 
+## For a data analyst application
+
+**Supporting data-product piece, not the analyst case study.** It shows API normalization, a chart drawn from live forecast fields, and tests around bad payloads. Lead a data analyst application with Bayline and the stroke casebook instead.
+
+<p align="center"><img src="SC/skycast-dashboard-2026.svg" alt="SkyCast dashboard" width="100%"></p>
+<p align="center"><img src="SC/skycast-forecast-2026.svg" alt="SkyCast seven-day forecast" width="100%"></p>
+
 [![SkyCast quality](https://github.com/ParBproject/skycast/actions/workflows/quality.yml/badge.svg)](https://github.com/ParBproject/skycast/actions/workflows/quality.yml)
 [![HTML](https://img.shields.io/badge/HTML5-CSS3-JavaScript-E34F26?logo=html5&logoColor=white)](https://parbproject.github.io/skycast/)
 [![PWA](https://img.shields.io/badge/PWA-Installable-5A0FC8?logo=pwa&logoColor=white)](https://parbproject.github.io/skycast/)
