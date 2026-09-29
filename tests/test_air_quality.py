@@ -44,7 +44,7 @@ class SkyCastAirQualityTests(unittest.TestCase):
             './styles/air-quality.css', './air-quality.js', './src/air-quality-core.js'
         ):
             self.assertIn(f'"{asset}"', self.worker)
-        self.assertIn('skycast-shell-v6', self.worker)
+        self.assertIn('skycast-shell-v7', self.worker)
 
 
 if __name__ == "__main__":

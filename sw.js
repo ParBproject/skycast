@@ -1,4 +1,4 @@
-const CACHE_VERSION = "skycast-shell-v6";
+const CACHE_VERSION = "skycast-shell-v7";
 const APP_SHELL = [
   "./",
   "./index.html",
@@ -18,9 +18,25 @@ const APP_SHELL = [
   "./assets/hero-snow.svg"
 ];
 
+function canStore(response) {
+  return Boolean(response && response.ok && response.type === "basic" && !response.redirected);
+}
+
+function revalidate(request) {
+  return fetch(new Request(request.url, {method:"GET", cache:"no-cache", credentials:"same-origin", mode:"same-origin"}));
+}
+
+function store(cache, key, response) {
+  if (!canStore(response)) return Promise.resolve(response);
+  return cache.put(key, response.clone()).then(() => response, () => response);
+}
+
 self.addEventListener("install", event => {
-  event.waitUntil(caches.open(CACHE_VERSION).then(cache => cache.addAll(APP_SHELL)));
-  self.skipWaiting();
+  event.waitUntil(
+    caches.open(CACHE_VERSION)
+      .then(cache => cache.addAll(APP_SHELL))
+      .then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener("activate", event => {
@@ -40,24 +56,26 @@ self.addEventListener("fetch", event => {
 
   if (request.mode === "navigate") {
     event.respondWith(
-      fetch(request)
-        .then(response => {
-          const copy = response.clone();
-          caches.open(CACHE_VERSION).then(cache => cache.put("./index.html", copy));
-          return response;
-        })
-        .catch(() => caches.match("./index.html"))
+      caches.open(CACHE_VERSION).then(cache =>
+        revalidate(request)
+          .then(response => {
+            if (canStore(response)) return store(cache, "./index.html", response);
+            return cache.match("./index.html").then(cached => cached || response);
+          })
+          .catch(() => cache.match("./index.html").then(cached => cached || Response.error()))
+      )
     );
     return;
   }
 
   event.respondWith(
-    caches.match(request).then(cached => cached || fetch(request).then(response => {
-      if (response.ok) {
-        const copy = response.clone();
-        caches.open(CACHE_VERSION).then(cache => cache.put(request, copy));
-      }
-      return response;
-    }))
+    caches.open(CACHE_VERSION).then(cache =>
+      revalidate(request)
+        .then(response => {
+          if (canStore(response)) return store(cache, request, response);
+          return cache.match(request).then(cached => cached || response);
+        })
+        .catch(() => cache.match(request).then(cached => cached || Response.error()))
+    )
   );
 });

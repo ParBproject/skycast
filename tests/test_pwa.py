@@ -70,6 +70,15 @@ class SkyCastPwaTests(unittest.TestCase):
         self.assertIn('request.method !== "GET"', self.worker)
         self.assertIn("url.origin !== self.location.origin", self.worker)
 
+    def test_service_worker_revalidates_the_current_shell_only(self):
+        self.assertIn("skycast-shell-v7", self.worker)
+        self.assertNotIn("caches.match(", self.worker)
+        self.assertIn("function canStore", self.worker)
+        self.assertIn("response.ok", self.worker)
+        self.assertIn("!response.redirected", self.worker)
+        self.assertIn('cache:"no-cache"', self.worker)
+        self.assertIn("cache.match(request)", self.worker)
+
 
 if __name__ == "__main__":
     unittest.main()
