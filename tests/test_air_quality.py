@@ -34,6 +34,11 @@ class SkyCastAirQualityTests(unittest.TestCase):
         self.assertNotIn("buildAirQualityURL", (ROOT / "app.js").read_text(encoding="utf-8"))
         self.assertIn("Weather forecast remains available separately", self.controller)
 
+    def test_air_fallback_clears_previous_location_metrics(self):
+        self.assertIn("function clearAirReadout", self.controller)
+        self.assertIn("clearAirReadout({unavailable:true})", self.controller)
+        self.assertNotIn("skycast:locationchange", self.controller)
+
     def test_pwa_precaches_atmospheric_modules(self):
         for asset in (
             './styles/air-quality.css', './air-quality.js', './src/air-quality-core.js'

@@ -113,6 +113,15 @@ class SkyCastProjectTests(unittest.TestCase):
         self.assertGreater(len(self.parser.meta_description or ""), 40)
         self.assertIn("<title>SkyCast — Weather Intelligence Dashboard</title>", self.index)
 
+    def test_weather_readout_does_not_keep_the_previous_location(self):
+        self.assertIn("function resetWeatherReadout", self.app)
+        self.assertIn("resetWeatherReadout(location);", self.app)
+        self.assertIn("resetWeatherReadout(location,{unavailable:true})", self.app)
+        self.assertIn("isCurrentModelHour", self.app)
+        self.assertIn("formatWindReading", self.app)
+        self.assertNotIn("wind_gusts_10m || 0", self.app)
+        self.assertIn("loadAirQuality(activeLocation,{force:true})", self.app)
+
     def test_legacy_page_routes_to_main_dashboard(self):
         legacy = (ROOT / "european_weather_forecast.html").read_text(encoding="utf-8")
         self.assertIn("url=./index.html", legacy)

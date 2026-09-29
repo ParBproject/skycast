@@ -51,15 +51,20 @@ function setAirStatus(message,error=false) {
   airEls.airStatus.classList.toggle("air-error",error);
 }
 
-function renderAirLoading() {
+function clearAirReadout({unavailable=false}={}) {
   airEls.aqiScore.textContent = "—";
-  airEls.aqiLevel.textContent = "Updating";
+  airEls.aqiLevel.textContent = unavailable ? "Unavailable" : "Updating";
   airEls.aqiLevel.dataset.tone = "unknown";
-  airEls.aqiAdvice.textContent = "Loading atmospheric conditions…";
-  airEls.aqiDriver.textContent = "Assessing dominant pollutant";
+  airEls.aqiAdvice.textContent = unavailable ? "Atmospheric data could not be loaded for this location." : "Loading atmospheric conditions…";
+  airEls.aqiDriver.textContent = unavailable ? "Weather forecast remains available separately." : "Assessing dominant pollutant";
   for (const id of ["pm25Metric","pm10Metric","uvMetric","ozoneMetric","pollenMetric"]) airEls[id].textContent = "—";
   airEls.uvDetail.textContent = "UV exposure";
   airEls.pollenDetail.textContent = "Seasonal data where available";
+  if (unavailable) airEls.airUpdated.textContent = "No recent air-quality data";
+}
+
+function renderAirLoading() {
+  clearAirReadout();
   setAirStatus("");
 }
 
@@ -87,13 +92,8 @@ function showAirFallback(location,message) {
     renderAirQuality(cached.data,{cached:true});
     return;
   }
+  clearAirReadout({unavailable:true});
   setAirStatus(message,true);
-  airEls.aqiScore.textContent = "—";
-  airEls.aqiLevel.textContent = "Unavailable";
-  airEls.aqiLevel.dataset.tone = "unknown";
-  airEls.aqiAdvice.textContent = "Atmospheric data could not be loaded for this location.";
-  airEls.aqiDriver.textContent = "Weather forecast remains available separately.";
-  airEls.airUpdated.textContent = "No recent air-quality data";
 }
 
 async function loadAirQuality(location,{force=false}={}) {
@@ -138,7 +138,6 @@ window.history.replaceState = function (...args) {
   return result;
 };
 
-window.addEventListener("skycast:locationchange",event=>loadAirQuality(event.detail?.location));
 window.addEventListener("popstate",()=>syncAirQualityFromURL());
 window.addEventListener("online",()=>{ if (currentAirLocation) loadAirQuality(currentAirLocation,{force:true}); else syncAirQualityFromURL({force:true}); });
 window.addEventListener("offline",()=>{ if (currentAirLocation) showAirFallback(currentAirLocation,"Network connection lost."); });

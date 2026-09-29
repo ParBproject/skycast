@@ -6,6 +6,8 @@ const {
   formatTemp,
   formatPct,
   formatTime,
+  formatWindReading,
+  isCurrentModelHour,
   windDirection,
   ageLabel,
   cacheKey,
@@ -182,8 +184,8 @@ function renderHero(location,data) {
   els.currentCondition.textContent = label;
   els.currentTemp.textContent = formatTemp(data.current.temperature_2m);
   els.currentCity.textContent = location.name;
-  const localTime = String(data.current.time || "").slice(11,16);
-  els.forecastTime.textContent = `${localTime || "—"}${data.timezoneAbbr ? ` ${data.timezoneAbbr}` : ""}`;
+  const localTime = formatTime(data.current.time);
+  els.forecastTime.textContent = localTime === "—" ? "—" : `${localTime}${data.timezoneAbbr ? ` ${data.timezoneAbbr}` : ""}`;
   els.heroArtwork.src = `assets/hero-${theme}.svg`;
   els.heroArtwork.alt = `${label} themed weather illustration`;
 }
@@ -191,12 +193,11 @@ function renderHero(location,data) {
 function renderMetrics(data) {
   const c = data.current;
   const today = data.days[0] || {};
-  const windUnit = unit === "fahrenheit" ? "mph" : "km/h";
   els.feelsMetric.textContent = formatTemp(c.apparent_temperature);
   els.humidityMetric.textContent = formatPct(c.relative_humidity_2m);
-  els.windMetric.textContent = Number.isFinite(Number(c.wind_speed_10m)) ? `${Math.round(c.wind_speed_10m)} ${windUnit}` : "—";
+  els.windMetric.textContent = formatWindReading(c.wind_speed_10m,unit);
   const direction = windDirection(c.wind_direction_10m);
-  els.windDetail.textContent = direction ? `${direction} • gusts ${Math.round(c.wind_gusts_10m || 0)} ${windUnit}` : "10 m wind speed";
+  els.windDetail.textContent = direction ? `${direction} • gusts ${formatWindReading(c.wind_gusts_10m,unit)}` : "10 m wind speed";
   els.cloudMetric.textContent = formatPct(c.cloud_cover);
   els.rainMetric.textContent = formatPct(today.rainChance);
   els.sunsetMetric.textContent = formatTime(today.sunset);
@@ -204,23 +205,21 @@ function renderMetrics(data) {
   els.timezoneLabel.textContent = data.timezone;
 }
 
-function renderHourly(hours) {
-  const windUnit = unit === "fahrenheit" ? "mph" : "km/h";
-  els.hourlyGrid.innerHTML = hours.map((hour,index) => {
+function renderHourly(hours,currentTime) {
+  els.hourlyGrid.innerHTML = hours.map(hour => {
     const [label,glyph] = weatherForCode(hour.code);
-    const timeLabel = index === 0 ? "Now" : formatTime(hour.time);
-    return `<article class="hour-card" aria-label="${timeLabel}: ${label}, ${formatTemp(hour.temp)}, rain ${formatPct(hour.rainChance)}"><div class="hour-time">${timeLabel}</div><div class="hour-glyph" aria-hidden="true">${glyph}</div><div class="hour-temp">${formatTemp(hour.temp)}</div><div class="hour-meta"><span>${label}</span><span>Rain ${formatPct(hour.rainChance)}</span><span>Wind ${Number.isFinite(Number(hour.wind)) ? `${Math.round(hour.wind)} ${windUnit}` : "—"}</span></div></article>`;
+    const timeLabel = isCurrentModelHour(hour.time,currentTime) ? "Now" : formatTime(hour.time);
+    return `<article class="hour-card" aria-label="${timeLabel}: ${label}, ${formatTemp(hour.temp)}, rain ${formatPct(hour.rainChance)}"><div class="hour-time">${timeLabel}</div><div class="hour-glyph" aria-hidden="true">${glyph}</div><div class="hour-temp">${formatTemp(hour.temp)}</div><div class="hour-meta"><span>${label}</span><span>Rain ${formatPct(hour.rainChance)}</span><span>Wind ${formatWindReading(hour.wind,unit)}</span></div></article>`;
   }).join("");
 }
 
 function renderForecast(days) {
-  const windUnit = unit === "fahrenheit" ? "mph" : "km/h";
   els.forecastGrid.innerHTML = days.map(day => {
     const [label,glyph] = weatherForCode(day.code);
     const dt = new Date(`${day.date}T12:00:00`);
     const weekday = dt.toLocaleDateString(undefined,{weekday:"short"});
     const date = dt.toLocaleDateString(undefined,{month:"short",day:"numeric"});
-    return `<article class="forecast-card"><div class="day-name">${weekday}</div><div class="day-date">${date}</div><div class="wx-glyph" aria-hidden="true">${glyph}</div><div class="wx-summary">${label}</div><div class="temp-line"><span class="temp-hi">${formatTemp(day.high)}</span><span class="temp-lo">${formatTemp(day.low)}</span></div><div class="day-meta"><span>Rain ${formatPct(day.rainChance)}</span><span>Wind ${Number.isFinite(Number(day.wind)) ? `${Math.round(day.wind)} ${windUnit}` : "—"}</span></div></article>`;
+    return `<article class="forecast-card"><div class="day-name">${weekday}</div><div class="day-date">${date}</div><div class="wx-glyph" aria-hidden="true">${glyph}</div><div class="wx-summary">${label}</div><div class="temp-line"><span class="temp-hi">${formatTemp(day.high)}</span><span class="temp-lo">${formatTemp(day.low)}</span></div><div class="day-meta"><span>Rain ${formatPct(day.rainChance)}</span><span>Wind ${formatWindReading(day.wind,unit)}</span></div></article>`;
   }).join("");
 }
 
@@ -253,11 +252,10 @@ function renderInsights(days) {
   }
   const {warmest,wettest,windiest,clearest} = insight;
   const dayName = d => new Date(`${d.date}T12:00:00`).toLocaleDateString(undefined,{weekday:"long"});
-  const windUnit = unit === "fahrenheit" ? "mph" : "km/h";
   const rows = [
     ["↗","Warmest day",`${dayName(warmest)} reaches about ${formatTemp(warmest.high)}.`],
     ["☂","Highest rain risk",`${dayName(wettest)} has up to ${formatPct(wettest.rainChance)} precipitation probability.`],
-    ["〰","Windiest day",`${dayName(windiest)} peaks near ${Math.round(Number(windiest.wind)||0)} ${windUnit}.`],
+    ["〰","Windiest day",`${dayName(windiest)} peaks near ${formatWindReading(windiest.wind,unit)}.`],
     ["◎","Clearer days",`${clearest} of ${days.length} days are clear, mainly clear, or partly cloudy.`]
   ];
   els.insights.innerHTML = rows.map(([icon,title,copy])=>`<div class="insight"><div class="insight-icon" aria-hidden="true">${icon}</div><div><strong>${title}</strong><span>${copy}</span></div></div>`).join("");
@@ -266,7 +264,7 @@ function renderInsights(days) {
 function renderData(location,data,{cached=false,savedAt=null}={}) {
   renderHero(location,data);
   renderMetrics(data);
-  renderHourly(data.hours || []);
+  renderHourly(data.hours || [],data.current && data.current.time);
   renderForecast(data.days);
   renderChart(data.days);
   renderInsights(data.days);
@@ -282,7 +280,32 @@ function renderData(location,data,{cached=false,savedAt=null}={}) {
   }
 }
 
-function renderLoading() {
+function resetWeatherReadout(location,{unavailable=false}={}) {
+  els.currentCity.textContent = location?.name || "Selected location";
+  els.currentCondition.textContent = unavailable ? "Unavailable" : "Updating…";
+  els.currentTemp.textContent = "—";
+  els.forecastTime.textContent = "—";
+  els.feelsMetric.textContent = "—";
+  els.humidityMetric.textContent = "—";
+  els.windMetric.textContent = "—";
+  els.windDetail.textContent = "10 m wind speed";
+  els.cloudMetric.textContent = "—";
+  els.rainMetric.textContent = "—";
+  els.sunsetMetric.textContent = "—";
+  els.sunriseDetail.textContent = "Sunrise —";
+  els.lastUpdated.textContent = unavailable ? "Unavailable" : "Updating";
+  els.cacheLabel.textContent = unavailable ? "No cached forecast" : "Updating model data";
+  els.timezoneLabel.textContent = "Local timezone";
+  els.insights.innerHTML = "";
+  els.chart.setAttribute("aria-label","Seven-day temperature chart");
+  if (unavailable) {
+    els.heroArtwork.src = "assets/hero-cloud.svg";
+    els.heroArtwork.alt = "Weather illustration unavailable";
+  }
+}
+
+function renderLoading(location) {
+  resetWeatherReadout(location);
   els.hourlyGrid.innerHTML = Array.from({length:8},()=>`<div class="hour-card"><div class="skeleton" style="height:13px;width:48px"></div><div class="skeleton" style="height:28px;width:34px;margin:14px 0 10px"></div><div class="skeleton" style="height:22px;width:52px"></div><div class="skeleton" style="height:30px;margin-top:9px"></div></div>`).join("");
   els.forecastGrid.innerHTML = Array.from({length:7},()=>`<div class="forecast-card"><div class="skeleton" style="height:14px;width:46px"></div><div class="skeleton" style="height:11px;width:60px;margin-top:8px"></div><div class="skeleton" style="height:48px;width:48px;margin:18px 0 14px"></div><div class="skeleton" style="height:30px"></div><div class="skeleton" style="height:22px;width:72px;margin-top:12px"></div></div>`).join("");
   els.chart.innerHTML = `<div class="skeleton" style="position:absolute;inset:18px"></div>`;
@@ -295,12 +318,12 @@ function showCachedOrUnavailable(location,message) {
     showStatus(`${message} Showing the last successful forecast from ${ageLabel(cached.savedAt)}.`,false,true);
     return true;
   }
+  resetWeatherReadout(location,{unavailable:true});
   setConnectionState("offline");
   showStatus(`${message} No recent cached forecast is available for this location and unit.`,true);
   els.hourlyGrid.innerHTML = `<div style="color:#8fa4bb;padding:18px 0">Hourly data is unavailable offline.</div>`;
   els.forecastGrid.innerHTML = `<div style="grid-column:1/-1;color:#8fa4bb;padding:22px 0">Live forecast cards are temporarily unavailable.</div>`;
   els.chart.innerHTML = "";
-  els.insights.innerHTML = "";
   return false;
 }
 
@@ -317,7 +340,7 @@ async function loadForecast() {
   }
 
   showStatus(`Updating live forecast for ${location.name}…`);
-  renderLoading();
+  renderLoading(location);
   els.refreshBtn.disabled = true;
   try {
     const response = await fetch(buildForecastURL(location,unit),{cache:"no-store",signal:activeController.signal});
@@ -454,7 +477,10 @@ els.city.addEventListener("change",()=>{
 });
 els.unitC.addEventListener("click",()=>{ unit="celsius"; localStorage.setItem("skycastUnit",unit); syncUnitButtons(); updateShareURL(); loadForecast(); });
 els.unitF.addEventListener("click",()=>{ unit="fahrenheit"; localStorage.setItem("skycastUnit",unit); syncUnitButtons(); updateShareURL(); loadForecast(); });
-els.refreshBtn.addEventListener("click",loadForecast);
+els.refreshBtn.addEventListener("click",()=>{
+  loadForecast();
+  if (typeof loadAirQuality === "function") loadAirQuality(activeLocation,{force:true});
+});
 els.locationSearchForm.addEventListener("submit",searchLocations);
 els.geoBtn.addEventListener("click",useCurrentLocation);
 els.favoriteBtn.addEventListener("click",()=>{
