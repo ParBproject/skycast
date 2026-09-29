@@ -70,6 +70,10 @@ class SkyCastPwaTests(unittest.TestCase):
         self.assertIn('request.method !== "GET"', self.worker)
         self.assertIn("url.origin !== self.location.origin", self.worker)
 
+    def test_install_control_is_available_on_narrow_screens(self):
+        css = (ROOT / "styles.css").read_text(encoding="utf-8")
+        self.assertNotRegex(css, r"\.install-btn\s*\{[^}]*display\s*:\s*none")
+
     def test_service_worker_revalidates_the_current_shell_only(self):
         self.assertIn("skycast-shell-v7", self.worker)
         self.assertNotIn("caches.match(", self.worker)

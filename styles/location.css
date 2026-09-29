@@ -112,8 +112,6 @@
 }
 .favorite-chip:hover { border-color: rgba(99,182,255,.38); background: rgba(99,182,255,.07); }
 
-.share-feedback { color: #bfe8ff; }
-
 @media (max-width: 820px) {
   .location-tools { grid-template-columns: 1fr 1fr; }
   .location-search { grid-column: 1 / -1; }

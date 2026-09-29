@@ -130,6 +130,7 @@ function renderFavorites() {
     button.type = "button";
     button.className = "favorite-chip";
     button.textContent = location.name;
+    if (sameLocation(location,activeLocation)) button.setAttribute("aria-current","true");
     button.addEventListener("click",()=>setActiveLocation(location));
     els.favoritesRow.appendChild(button);
   }
@@ -228,6 +229,7 @@ function renderChart(days) {
   const lows = days.map(d => Number(d.low)).filter(Number.isFinite);
   if (!highs.length || highs.length !== days.length || lows.length !== days.length) {
     els.chart.innerHTML = "";
+    els.chart.setAttribute("aria-label","Seven-day temperature chart");
     return;
   }
   const all = highs.concat(lows);
@@ -241,7 +243,9 @@ function renderChart(days) {
   const grid=Array.from({length:4},(_,i)=>min+i*((max-min)/3)).map(v=>`<line x1="${left}" x2="${W-right}" y1="${y(v)}" y2="${y(v)}" stroke="rgba(160,190,220,.10)"/><text x="12" y="${y(v)+4}" fill="#7890a8" font-size="11">${Math.round(v)}°</text>`).join("");
   const labels=days.map((d,i)=>`<text x="${x(i)}" y="${H-15}" text-anchor="middle" fill="#7890a8" font-size="11">${new Date(`${d.date}T12:00:00`).toLocaleDateString(undefined,{weekday:"short"})}</text>`).join("");
   const dots=highs.map((v,i)=>`<circle cx="${x(i)}" cy="${y(v)}" r="4" fill="#ffd178"/><text x="${x(i)}" y="${y(v)-10}" text-anchor="middle" fill="#ffdba0" font-size="11" font-weight="700">${Math.round(v)}°</text>`).join("") + lows.map((v,i)=>`<circle cx="${x(i)}" cy="${y(v)}" r="4" fill="#63b6ff"/>`).join("");
-  els.chart.innerHTML = `<svg viewBox="0 0 ${W} ${H}" role="img" aria-label="High and low temperature trend">${grid}<polyline points="${points(highs)}" fill="none" stroke="#ffd178" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><polyline points="${points(lows)}" fill="none" stroke="#63b6ff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>${dots}${labels}</svg>`;
+  const summary = days.map((d,i)=>`${new Date(`${d.date}T12:00:00`).toLocaleDateString(undefined,{weekday:"short"})} high ${Math.round(highs[i])}°, low ${Math.round(lows[i])}°`).join(", ");
+  els.chart.setAttribute("aria-label",`Seven-day temperature chart. ${summary}`);
+  els.chart.innerHTML = `<svg viewBox="0 0 ${W} ${H}" aria-hidden="true">${grid}<polyline points="${points(highs)}" fill="none" stroke="#ffd178" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/><polyline points="${points(lows)}" fill="none" stroke="#63b6ff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>${dots}${labels}</svg>`;
 }
 
 function renderInsights(days) {
@@ -363,21 +367,26 @@ async function loadForecast() {
 function hideLocationResults() {
   els.locationResults.hidden = true;
   els.locationResults.replaceChildren();
+  els.locationQuery.setAttribute("aria-expanded","false");
 }
 
 function renderLocationResults(results) {
   els.locationResults.replaceChildren();
   if (!results.length) {
+    els.locationResults.setAttribute("role","status");
     const empty = document.createElement("div");
     empty.className = "location-empty";
     empty.textContent = "No matching locations found. Try a city plus country or a postal code.";
     els.locationResults.appendChild(empty);
   } else {
-    for (const result of results) {
+    els.locationResults.setAttribute("role","listbox");
+    results.forEach((result,index)=>{
       const button = document.createElement("button");
       button.type = "button";
       button.className = "location-result";
+      button.id = `locationOption${index}`;
       button.setAttribute("role","option");
+      button.setAttribute("aria-selected","false");
       const title = document.createElement("strong");
       title.textContent = result.name;
       const meta = document.createElement("span");
@@ -389,9 +398,30 @@ function renderLocationResults(results) {
         setActiveLocation(result);
       });
       els.locationResults.appendChild(button);
-    }
+    });
   }
   els.locationResults.hidden = false;
+  els.locationQuery.setAttribute("aria-expanded","true");
+}
+
+function onLocationResultKeydown(event) {
+  if (event.key === "Escape") {
+    if (!els.locationResults.hidden) {
+      hideLocationResults();
+      els.locationQuery.focus();
+    }
+    return;
+  }
+  if (event.key !== "ArrowDown" && event.key !== "ArrowUp") return;
+  const options = [...els.locationResults.querySelectorAll(".location-result")];
+  if (!options.length || els.locationResults.hidden) return;
+  event.preventDefault();
+  const current = options.findIndex(option => option === document.activeElement);
+  const nextIndex = event.key === "ArrowDown"
+    ? (current < 0 ? 0 : (current + 1) % options.length)
+    : (current < 0 ? options.length - 1 : (current - 1 + options.length) % options.length);
+  options.forEach((option,index)=>option.setAttribute("aria-selected",String(index === nextIndex)));
+  options[nextIndex].focus();
 }
 
 async function searchLocations(event) {
@@ -490,7 +520,8 @@ els.favoriteBtn.addEventListener("click",()=>{
   syncFavoriteButton();
 });
 els.shareBtn.addEventListener("click",shareCurrentForecast);
-els.locationQuery.addEventListener("keydown",event=>{ if (event.key === "Escape") hideLocationResults(); });
+els.locationQuery.addEventListener("keydown",onLocationResultKeydown);
+els.locationResults.addEventListener("keydown",onLocationResultKeydown);
 document.addEventListener("pointerdown",event=>{ if (!els.locationSearchForm.contains(event.target)) hideLocationResults(); });
 
 window.addEventListener("online",()=>{ setConnectionState("live"); loadForecast(); });
