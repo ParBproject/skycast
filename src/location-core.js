@@ -107,7 +107,8 @@
     if (!params.has("lat") || !params.has("lon")) return null;
     const location = sanitizeLocation({name:params.get("name") || "Shared location",lat:params.get("lat"),lon:params.get("lon")});
     if (!location) return null;
-    return {location,unit:params.get("unit") === "f" ? "fahrenheit" : "celsius"};
+    const unitParam = String(params.get("unit") || "").toLowerCase();
+    return {location,unit:unitParam === "f" ? "fahrenheit" : "celsius"};
   }
 
   return {

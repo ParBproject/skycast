@@ -100,6 +100,7 @@ test("round-trips a Celsius share link",()=>{
 test("round-trips Fahrenheit and safely rejects invalid shared coordinates",()=>{
   const query = buildShareQuery({name:"New York",lat:40.7128,lon:-74.006},"fahrenheit");
   assert.equal(parseShareQuery(query).unit,"fahrenheit");
+  assert.equal(parseShareQuery("?lat=40.7128&lon=-74.006&unit=F").unit,"fahrenheit");
   assert.equal(parseShareQuery("?lat=999&lon=0&name=Bad"),null);
   assert.equal(parseShareQuery("?name=MissingCoordinates"),null);
 });

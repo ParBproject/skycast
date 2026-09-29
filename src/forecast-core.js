@@ -19,17 +19,31 @@
   function formatTemp(value) { return Number.isFinite(Number(value)) ? `${Math.round(Number(value))}°` : "—"; }
   function formatPct(value) { return Number.isFinite(Number(value)) ? `${Math.round(Number(value))}%` : "—"; }
   function formatTime(localIso) {
-    if (!localIso || !String(localIso).includes("T")) return "—";
-    const [h,m] = String(localIso).split("T")[1].split(":");
+    const clock = String(localIso || "").split("T")[1] || "";
+    const [h, m] = clock.split(":");
     const hour = Number(h);
-    if (!Number.isFinite(hour)) return "—";
+    const minuteText = String(m ?? "");
+    const minute = Number(minuteText.slice(0, 2));
+    if (!Number.isFinite(hour) || minuteText.length < 2 || !Number.isFinite(minute) || hour < 0 || hour > 23 || minute < 0 || minute > 59) return "—";
     const suffix = hour >= 12 ? "PM" : "AM";
-    return `${hour % 12 || 12}:${m} ${suffix}`;
+    return `${hour % 12 || 12}:${String(minute).padStart(2, "0")} ${suffix}`;
+  }
+  function formatWindReading(speed, unit) {
+    const value = Number(speed);
+    if (!Number.isFinite(value)) return "—";
+    return `${Math.round(value)} ${unit === "fahrenheit" ? "mph" : "km/h"}`;
+  }
+  function isCurrentModelHour(hourTime, currentTime) {
+    const hour = String(hourTime || "");
+    const current = String(currentTime || "");
+    return hour.length >= 13 && current.length >= 13 && hour.slice(0, 13) === current.slice(0, 13);
   }
   function windDirection(degrees) {
-    if (!Number.isFinite(Number(degrees))) return "";
+    const value = Number(degrees);
+    if (!Number.isFinite(value)) return "";
     const dirs = ["N","NE","E","SE","S","SW","W","NW"];
-    return dirs[Math.round(Number(degrees) / 45) % 8];
+    const normalized = ((value % 360) + 360) % 360;
+    return dirs[Math.round(normalized / 45) % 8];
   }
   function ageLabel(savedAt, now = Date.now()) {
     const minutes = Math.max(1, Math.round((now - savedAt) / 60000));
@@ -37,9 +51,16 @@
     const hours = Math.round(minutes / 60);
     return `${hours} hr${hours === 1 ? "" : "s"} ago`;
   }
-  function cacheKey(city, unit) { return `skycastForecast:v4:${city.lat}:${city.lon}:${unit}`; }
+  function cacheKey(city, unit) {
+    const lat = Number(city && city.lat);
+    const lon = Number(city && city.lon);
+    const latKey = Number.isFinite(lat) ? lat.toFixed(4) : "na";
+    const lonKey = Number.isFinite(lon) ? lon.toFixed(4) : "na";
+    return `skycastForecast:v4:${latKey}:${lonKey}:${unit}`;
+  }
   function isCacheFresh(savedAt, now = Date.now(), ttl = CACHE_TTL_MS) {
-    return Number.isFinite(Number(savedAt)) && now - Number(savedAt) <= ttl;
+    const saved = Number(savedAt);
+    return Number.isFinite(saved) && now >= saved && now - saved <= ttl;
   }
 
   function buildForecastURL(city, unit) {
@@ -85,5 +106,5 @@
     return {warmest, wettest, windiest, clearest};
   }
 
-  return { CACHE_TTL_MS, WMO, weatherForCode, formatTemp, formatPct, formatTime, windDirection, ageLabel, cacheKey, isCacheFresh, buildForecastURL, normalizeForecast, deriveInsights };
+  return { CACHE_TTL_MS, WMO, weatherForCode, formatTemp, formatPct, formatTime, formatWindReading, isCurrentModelHour, windDirection, ageLabel, cacheKey, isCacheFresh, buildForecastURL, normalizeForecast, deriveInsights };
 });
