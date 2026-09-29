@@ -19,6 +19,7 @@ const {
 
 const {
   DEFAULT_CITIES,
+  legacyCityIndex,
   sanitizeLocation,
   locationKey,
   sameLocation,
@@ -47,9 +48,8 @@ const sharedState = parseShareQuery(window.location.search);
 let unit = sharedState?.unit || localStorage.getItem("skycastUnit") || "celsius";
 if (!["celsius","fahrenheit"].includes(unit)) unit = "celsius";
 
-const legacySavedCity = Number(localStorage.getItem("skycastCity"));
 const savedLocation = sanitizeLocation(readJSON("skycastLocation",null));
-let activeLocation = sharedState?.location || savedLocation || DEFAULT_CITIES[Number.isInteger(legacySavedCity) && legacySavedCity >= 0 && legacySavedCity < DEFAULT_CITIES.length ? legacySavedCity : 10];
+let activeLocation = sharedState?.location || savedLocation || DEFAULT_CITIES[legacyCityIndex(localStorage.getItem("skycastCity"))];
 let favorites = trimFavorites(readJSON("skycastFavorites",[]));
 let activeController = null;
 let searchController = null;

@@ -26,6 +26,13 @@
     return Number.isFinite(number) && number >= min && number <= max;
   }
 
+  function legacyCityIndex(raw, length = DEFAULT_CITIES.length, fallback = 10) {
+    if (raw === null || raw === undefined || String(raw).trim() === "") return fallback;
+    const index = Number(raw);
+    if (!Number.isInteger(index) || index < 0 || index >= length) return fallback;
+    return index;
+  }
+
   function sanitizeLocation(location) {
     if (!location || !validCoordinate(location.lat,-90,90) || !validCoordinate(location.lon,-180,180)) return null;
     const name = String(location.name || "Selected location").trim().slice(0,120) || "Selected location";
@@ -115,6 +122,7 @@
     GEOCODING_ENDPOINT,
     FAVORITES_LIMIT,
     DEFAULT_CITIES,
+    legacyCityIndex,
     sanitizeLocation,
     locationKey,
     sameLocation,

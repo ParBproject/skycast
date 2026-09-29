@@ -90,6 +90,7 @@ class SkyCastProjectTests(unittest.TestCase):
         self.assertIn("toggleFavorite", self.app)
         self.assertIn("buildShareQuery", self.app)
         self.assertIn("parseShareQuery", self.app)
+        self.assertIn("legacyCityIndex", self.app)
         self.assertIn("navigator.share", self.app)
 
     def test_readme_preview_assets_exist(self):

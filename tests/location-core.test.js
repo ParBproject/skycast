@@ -5,6 +5,7 @@ const {
   GEOCODING_ENDPOINT,
   FAVORITES_LIMIT,
   DEFAULT_CITIES,
+  legacyCityIndex,
   sanitizeLocation,
   locationKey,
   sameLocation,
@@ -29,6 +30,17 @@ function test(name,fn) {
 test("keeps 22 unique curated European presets",()=>{
   assert.equal(DEFAULT_CITIES.length,22);
   assert.equal(new Set(DEFAULT_CITIES.map(locationKey)).size,22);
+});
+
+test("uses London when no legacy city index is stored",()=>{
+  assert.equal(legacyCityIndex(null),10);
+  assert.equal(legacyCityIndex(undefined),10);
+  assert.equal(legacyCityIndex(""),10);
+  assert.equal(DEFAULT_CITIES[legacyCityIndex(null)].name,"London, UK");
+  assert.equal(legacyCityIndex("0"),0);
+  assert.equal(legacyCityIndex("21"),21);
+  assert.equal(legacyCityIndex("22"),10);
+  assert.equal(legacyCityIndex("nope"),10);
 });
 
 test("validates and sanitizes locations",()=>{
