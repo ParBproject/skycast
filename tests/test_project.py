@@ -90,6 +90,7 @@ class SkyCastProjectTests(unittest.TestCase):
         self.assertIn("toggleFavorite", self.app)
         self.assertIn("buildShareQuery", self.app)
         self.assertIn("parseShareQuery", self.app)
+        self.assertIn("legacyCityIndex", self.app)
         self.assertIn("navigator.share", self.app)
 
     def test_readme_preview_assets_exist(self):
@@ -112,6 +113,24 @@ class SkyCastProjectTests(unittest.TestCase):
         self.assertIsNotNone(self.parser.meta_description)
         self.assertGreater(len(self.parser.meta_description or ""), 40)
         self.assertIn("<title>SkyCast — Weather Intelligence Dashboard</title>", self.index)
+
+    def test_weather_readout_does_not_keep_the_previous_location(self):
+        self.assertIn("function resetWeatherReadout", self.app)
+        self.assertIn("resetWeatherReadout(location);", self.app)
+        self.assertIn("resetWeatherReadout(location,{unavailable:true})", self.app)
+        self.assertIn("isCurrentModelHour", self.app)
+        self.assertIn("formatWindReading", self.app)
+        self.assertNotIn("wind_gusts_10m || 0", self.app)
+        self.assertIn("loadAirQuality(activeLocation,{force:true})", self.app)
+
+    def test_location_search_supports_keyboard_and_named_groups(self):
+        self.assertIn('aria-expanded="false"', self.index)
+        self.assertIn('role="group" aria-label="Favorite locations"', self.index)
+        self.assertIn("ArrowDown", self.app)
+        self.assertIn("aria-selected", self.app)
+        self.assertIn('setAttribute("aria-expanded","true")', self.app)
+        self.assertIn('setAttribute("aria-current","true")', self.app)
+        self.assertIn("Seven-day temperature chart.", self.app)
 
     def test_legacy_page_routes_to_main_dashboard(self):
         legacy = (ROOT / "european_weather_forecast.html").read_text(encoding="utf-8")

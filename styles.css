@@ -145,6 +145,6 @@ footer { border-top: 1px solid var(--border); }
 
 @media (max-width: 1080px) { .metrics { grid-template-columns: repeat(3,1fr); } .section-grid { grid-template-columns: 1fr; } }
 @media (max-width: 900px) { .hero { grid-template-columns: 1fr; } .hero-art { min-height: 360px; } .top-actions .source-link { display: none; } }
-@media (max-width: 700px) { .top-actions { gap: 7px; } .install-btn { display: none !important; } }
+@media (max-width: 700px) { .top-actions { gap: 7px; } }
 @media (max-width: 640px) { .app-shell { width: min(100% - 20px,1320px); } .topbar { min-height: 68px; } .brand-copy span, .live-pill { display: none; } main { padding-top: 20px; } .hero-content { padding: 26px 20px 28px; } .hero h1 { font-size: 42px; } .hero-art { min-height: 300px; } .condition-float { right: 14px; bottom: 14px; width: calc(100% - 28px); } .metrics { grid-template-columns: repeat(2,1fr); } .panel-pad { padding: 18px; } .panel-head { align-items: flex-start; flex-direction: column; } .footer-inner { align-items: flex-start; flex-direction: column; justify-content: center; padding: 20px 0; } }
 @media (prefers-reduced-motion: reduce) { *, *::before, *::after { scroll-behavior: auto!important; animation-duration: .001ms!important; animation-iteration-count: 1!important; transition-duration: .001ms!important; } }

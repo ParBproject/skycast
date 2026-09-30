@@ -132,7 +132,7 @@ The service worker caches only same-origin application assets. Forecast, geocodi
 | Offline shell | Versioned Service Worker + Cache Storage |
 | Unit testing | Node built-in `assert`, no third-party test framework |
 | Structural/PWA tests | Python standard-library `unittest` |
-| CI | GitHub Actions on pushes, pull requests, and manual runs |
+| CI | GitHub Actions on pushes to main, pull requests, and manual runs |
 | Deployment | GitHub Pages |
 
 ## Quality Checks

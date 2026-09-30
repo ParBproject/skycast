@@ -26,6 +26,13 @@
     return Number.isFinite(number) && number >= min && number <= max;
   }
 
+  function legacyCityIndex(raw, length = DEFAULT_CITIES.length, fallback = 10) {
+    if (raw === null || raw === undefined || String(raw).trim() === "") return fallback;
+    const index = Number(raw);
+    if (!Number.isInteger(index) || index < 0 || index >= length) return fallback;
+    return index;
+  }
+
   function sanitizeLocation(location) {
     if (!location || !validCoordinate(location.lat,-90,90) || !validCoordinate(location.lon,-180,180)) return null;
     const name = String(location.name || "Selected location").trim().slice(0,120) || "Selected location";
@@ -107,13 +114,15 @@
     if (!params.has("lat") || !params.has("lon")) return null;
     const location = sanitizeLocation({name:params.get("name") || "Shared location",lat:params.get("lat"),lon:params.get("lon")});
     if (!location) return null;
-    return {location,unit:params.get("unit") === "f" ? "fahrenheit" : "celsius"};
+    const unitParam = String(params.get("unit") || "").toLowerCase();
+    return {location,unit:unitParam === "f" ? "fahrenheit" : "celsius"};
   }
 
   return {
     GEOCODING_ENDPOINT,
     FAVORITES_LIMIT,
     DEFAULT_CITIES,
+    legacyCityIndex,
     sanitizeLocation,
     locationKey,
     sameLocation,

@@ -63,16 +63,33 @@ function fixture() {
   assert.deepEqual(core.weatherForCode(999),["Variable conditions","☁","cloud"]);
   assert.equal(core.windDirection(359),"N");
   assert.equal(core.windDirection(90),"E");
+  assert.equal(core.windDirection(360),"N");
+  assert.equal(core.windDirection(-45),"NW","negative directions must wrap instead of indexing undefined");
   assert.equal(core.formatTime("2026-09-10T00:05"),"12:05 AM");
   assert.equal(core.formatTime("2026-09-10T13:45"),"1:45 PM");
+  assert.equal(core.formatTime("2026-09-10T13:45:00"),"1:45 PM");
+  assert.equal(core.formatTime("2026-09-10T13"),"—","a timestamp without minutes must not render the word undefined");
+  assert.equal(core.formatWindReading(undefined,"celsius"),"—","missing gusts must not become zero");
+  assert.equal(core.formatWindReading(0,"celsius"),"0 km/h");
+  assert.equal(core.formatWindReading(12.6,"fahrenheit"),"13 mph");
+  assert.equal(core.isCurrentModelHour("2026-09-10T13:00","2026-09-10T13:35"),true);
+  assert.equal(core.isCurrentModelHour("2026-09-10T06:00","2026-09-10T05:10"),false,"an earlier hour is not Now");
+  assert.equal(core.isCurrentModelHour("","2026-09-10T13:35"),false);
 }
 
 {
   const now = 2_000_000_000_000;
   assert.equal(core.isCacheFresh(now-core.CACHE_TTL_MS,now),true,"TTL boundary should remain valid");
   assert.equal(core.isCacheFresh(now-core.CACHE_TTL_MS-1,now),false,"entries older than TTL must expire");
+  assert.equal(core.isCacheFresh(now+60_000,now),false,"a future timestamp must not count as a fresh forecast");
   assert.equal(core.ageLabel(now-60*60*1000,now),"1 hr ago");
   assert.match(core.cacheKey({lat:1,lon:2},"celsius"),/^skycastForecast:v4:/);
+  assert.equal(
+    core.cacheKey({lat:51.507401,lon:-0.127801},"celsius"),
+    core.cacheKey({lat:51.507399,lon:-0.127799},"celsius"),
+    "cache identity must follow the same 4-decimal location key as favorites"
+  );
+  assert.notEqual(core.cacheKey({lat:51.5,lon:-0.12},"celsius"),core.cacheKey({lat:51.5,lon:-0.12},"fahrenheit"));
 }
 
 {

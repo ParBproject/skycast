@@ -54,14 +54,14 @@
               <div class="location-tools">
                 <form id="locationSearchForm" class="location-search" role="search">
                   <label for="locationQuery" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Search city or postal code</label>
-                  <input id="locationQuery" type="search" inputmode="search" autocomplete="off" placeholder="Search city or postal code" aria-autocomplete="list" aria-controls="locationResults">
+                  <input id="locationQuery" type="search" inputmode="search" autocomplete="off" placeholder="Search city or postal code" aria-autocomplete="list" aria-controls="locationResults" aria-expanded="false">
                   <button id="locationSearchBtn" type="submit">Search</button>
                   <div id="locationResults" class="location-results" role="listbox" hidden></div>
                 </form>
                 <button id="geoBtn" class="ghost-btn location-action" type="button">⌖ Use my location</button>
                 <button id="favoriteBtn" class="ghost-btn location-action" type="button" aria-pressed="false">☆ Save</button>
               </div>
-              <div id="favoritesRow" class="favorites-row" aria-label="Favorite locations" hidden></div>
+              <div id="favoritesRow" class="favorites-row" role="group" aria-label="Favorite locations" hidden></div>
             </div>
           </div>
           <div class="hero-art">
