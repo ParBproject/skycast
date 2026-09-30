@@ -21,9 +21,20 @@
     {name:"Warsaw, Poland",lat:52.2297,lon:21.0122},{name:"Zurich, Switzerland",lat:47.3769,lon:8.5417}
   ];
 
+  function finiteNumber(value) {
+    if (typeof value === "number") return Number.isFinite(value) ? value : null;
+    if (typeof value === "string") {
+      const trimmed = value.trim();
+      if (!trimmed) return null;
+      const number = Number(trimmed);
+      return Number.isFinite(number) ? number : null;
+    }
+    return null;
+  }
+
   function validCoordinate(value, min, max) {
-    const number = Number(value);
-    return Number.isFinite(number) && number >= min && number <= max;
+    const number = finiteNumber(value);
+    return number !== null && number >= min && number <= max;
   }
 
   function legacyCityIndex(raw, length = DEFAULT_CITIES.length, fallback = 10) {

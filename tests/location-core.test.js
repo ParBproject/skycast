@@ -47,6 +47,11 @@ test("validates and sanitizes locations",()=>{
   assert.deepEqual(sanitizeLocation({name:"  Toronto  ",lat:"43.65",lon:"-79.38"}),{name:"Toronto",lat:43.65,lon:-79.38,timezone:""});
   assert.equal(sanitizeLocation({name:"Bad",lat:91,lon:0}),null);
   assert.equal(sanitizeLocation({name:"Bad",lat:0,lon:-181}),null);
+  assert.equal(sanitizeLocation({name:"Missing",lat:null,lon:null}),null);
+  assert.equal(sanitizeLocation({name:"Blank",lat:"",lon:""}),null);
+  assert.equal(sanitizeLocation({name:"Blank",lat:"  ",lon:"  "}),null);
+  assert.equal(sanitizeLocation({name:"Equator",lat:0,lon:0}).lat,0);
+  assert.equal(sanitizeLocation({name:"Equator",lat:0,lon:0}).lon,0);
 });
 
 test("uses coordinate precision for location identity",()=>{
@@ -115,6 +120,8 @@ test("round-trips Fahrenheit and safely rejects invalid shared coordinates",()=>
   assert.equal(parseShareQuery("?lat=40.7128&lon=-74.006&unit=F").unit,"fahrenheit");
   assert.equal(parseShareQuery("?lat=999&lon=0&name=Bad"),null);
   assert.equal(parseShareQuery("?name=MissingCoordinates"),null);
+  assert.equal(parseShareQuery("?lat=&lon=&name=London"),null,"blank coordinates must not become 0,0");
+  assert.equal(parseShareQuery("?lat=0&lon=0&name=Equator").location.name,"Equator");
 });
 
 console.log("Location core tests passed.");

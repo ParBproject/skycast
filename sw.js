@@ -1,4 +1,4 @@
-const CACHE_VERSION = "skycast-shell-v7";
+const CACHE_VERSION = "skycast-shell-v8";
 const APP_SHELL = [
   "./",
   "./index.html",

@@ -3,6 +3,7 @@
 const {
   CACHE_TTL_MS,
   weatherForCode,
+  finiteNumber,
   formatTemp,
   formatPct,
   formatTime,
@@ -55,6 +56,12 @@ let activeController = null;
 let searchController = null;
 let loadSequence = 0;
 let deferredInstallPrompt = null;
+let searchSequence = 0;
+
+function persistPreference(key, value) {
+  try { localStorage.setItem(key, value); }
+  catch (error) { console.warn("SkyCast preference write skipped", error); }
+}
 
 document.getElementById("year").textContent = new Date().getFullYear();
 
@@ -225,9 +232,9 @@ function renderForecast(days) {
 }
 
 function renderChart(days) {
-  const highs = days.map(d => Number(d.high)).filter(Number.isFinite);
-  const lows = days.map(d => Number(d.low)).filter(Number.isFinite);
-  if (!highs.length || highs.length !== days.length || lows.length !== days.length) {
+  const highs = days.map(d => finiteNumber(d.high));
+  const lows = days.map(d => finiteNumber(d.low));
+  if (!days.length || highs.some(value => value === null) || lows.some(value => value === null)) {
     els.chart.innerHTML = "";
     els.chart.setAttribute("aria-label","Seven-day temperature chart");
     return;
@@ -254,14 +261,12 @@ function renderInsights(days) {
     els.insights.innerHTML = "";
     return;
   }
-  const {warmest,wettest,windiest,clearest} = insight;
   const dayName = d => new Date(`${d.date}T12:00:00`).toLocaleDateString(undefined,{weekday:"long"});
-  const rows = [
-    ["↗","Warmest day",`${dayName(warmest)} reaches about ${formatTemp(warmest.high)}.`],
-    ["☂","Highest rain risk",`${dayName(wettest)} has up to ${formatPct(wettest.rainChance)} precipitation probability.`],
-    ["〰","Windiest day",`${dayName(windiest)} peaks near ${formatWindReading(windiest.wind,unit)}.`],
-    ["◎","Clearer days",`${clearest} of ${days.length} days are clear, mainly clear, or partly cloudy.`]
-  ];
+  const rows = [];
+  if (insight.warmest) rows.push(["↗","Warmest day",`${dayName(insight.warmest)} reaches about ${formatTemp(insight.warmest.high)}.`]);
+  if (insight.wettest) rows.push(["☂","Highest rain risk",`${dayName(insight.wettest)} has up to ${formatPct(insight.wettest.rainChance)} precipitation probability.`]);
+  if (insight.windiest) rows.push(["〰","Windiest day",`${dayName(insight.windiest)} peaks near ${formatWindReading(insight.windiest.wind,unit)}.`]);
+  rows.push(["◎","Clearer days",`${insight.clearest} of ${days.length} days are clear, mainly clear, or partly cloudy.`]);
   els.insights.innerHTML = rows.map(([icon,title,copy])=>`<div class="insight"><div class="insight-icon" aria-hidden="true">${icon}</div><div><strong>${title}</strong><span>${copy}</span></div></div>`).join("");
 }
 
@@ -378,7 +383,9 @@ function renderLocationResults(results) {
     empty.className = "location-empty";
     empty.textContent = "No matching locations found. Try a city plus country or a postal code.";
     els.locationResults.appendChild(empty);
+    showStatus("No matching locations found. Try a city plus country or a postal code.");
   } else {
+    showStatus("");
     els.locationResults.setAttribute("role","listbox");
     results.forEach((result,index)=>{
       const button = document.createElement("button");
@@ -436,6 +443,7 @@ async function searchLocations(event) {
     showStatus("Location search requires a network connection.",true);
     return;
   }
+  const sequence = ++searchSequence;
   if (searchController) searchController.abort();
   searchController = new AbortController();
   els.locationSearchBtn.disabled = true;
@@ -443,17 +451,20 @@ async function searchLocations(event) {
   try {
     const response = await fetch(buildGeocodingURL(query,8),{cache:"no-store",signal:searchController.signal});
     if (!response.ok) throw new Error(`Location service returned ${response.status}`);
+    if (sequence !== searchSequence) return;
     const results = normalizeGeocodingResults(await response.json());
+    if (sequence !== searchSequence) return;
     renderLocationResults(results);
-    showStatus("");
   } catch (error) {
-    if (error.name === "AbortError") return;
+    if (error.name === "AbortError" || sequence !== searchSequence) return;
     console.error(error);
     hideLocationResults();
     showStatus("SkyCast could not search locations right now.",true);
   } finally {
-    els.locationSearchBtn.disabled = false;
-    els.locationSearchBtn.textContent = "Search";
+    if (sequence === searchSequence) {
+      els.locationSearchBtn.disabled = false;
+      els.locationSearchBtn.textContent = "Search";
+    }
   }
 }
 
@@ -505,8 +516,8 @@ els.city.addEventListener("change",()=>{
   const selected = allSelectableLocations().find(location=>locationKey(location) === els.city.value);
   if (selected) setActiveLocation(selected);
 });
-els.unitC.addEventListener("click",()=>{ unit="celsius"; localStorage.setItem("skycastUnit",unit); syncUnitButtons(); updateShareURL(); loadForecast(); });
-els.unitF.addEventListener("click",()=>{ unit="fahrenheit"; localStorage.setItem("skycastUnit",unit); syncUnitButtons(); updateShareURL(); loadForecast(); });
+els.unitC.addEventListener("click",()=>{ unit="celsius"; persistPreference("skycastUnit",unit); syncUnitButtons(); updateShareURL(); loadForecast(); });
+els.unitF.addEventListener("click",()=>{ unit="fahrenheit"; persistPreference("skycastUnit",unit); syncUnitButtons(); updateShareURL(); loadForecast(); });
 els.refreshBtn.addEventListener("click",()=>{
   loadForecast();
   if (typeof loadAirQuality === "function") loadAirQuality(activeLocation,{force:true});
@@ -530,7 +541,7 @@ window.addEventListener("popstate",()=>{
   const state = parseShareQuery(window.location.search);
   if (!state) return;
   unit = state.unit;
-  localStorage.setItem("skycastUnit",unit);
+  persistPreference("skycastUnit",unit);
   syncUnitButtons();
   setActiveLocation(state.location,{persist:true,refresh:true});
 });

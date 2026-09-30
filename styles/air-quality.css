@@ -11,7 +11,7 @@
 .air-level[data-tone="poor"], .air-level[data-tone="very-poor"], .air-level[data-tone="extreme"] { color:#ffd0d0; border-color:rgba(255,159,159,.28); background:rgba(255,159,159,.07); }
 .air-advice { margin:16px 0 0; color:#c8d7e6; font-size:13px; line-height:1.55; }
 .air-driver { margin-top:12px; color:#8fa4bb; font-size:11px; }
-.air-metrics { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:10px; }
+.air-metrics { display:grid; grid-template-columns:repeat(5,minmax(0,1fr)); gap:10px; min-width:0; }
 .air-metric { min-height:190px; padding:18px; border:1px solid rgba(160,190,220,.11); border-radius:18px; background:rgba(255,255,255,.024); }
 .air-metric span { color:var(--muted); font-size:10px; font-weight:800; letter-spacing:.07em; text-transform:uppercase; }
 .air-metric strong { display:block; margin-top:16px; font-size:24px; line-height:1.1; font-weight:850; letter-spacing:-.03em; }

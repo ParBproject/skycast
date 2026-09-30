@@ -18,7 +18,7 @@ let currentAirLocation = null;
 let currentAirLocationKey = "";
 
 function formatConcentration(value) {
-  return Number.isFinite(Number(value)) ? `${Math.round(Number(value))} µg/m³` : "—";
+  return Number.isFinite(value) ? `${Math.round(value)} µg/m³` : "—";
 }
 
 function saveAirCache(location,data) {
@@ -69,7 +69,7 @@ function renderAirLoading() {
 }
 
 function renderAirQuality(data,{cached=false}={}) {
-  const score = Number.isFinite(Number(data.aqi)) ? Math.round(Number(data.aqi)) : "—";
+  const score = Number.isFinite(data.aqi) ? Math.round(data.aqi) : "—";
   airEls.aqiScore.textContent = score;
   airEls.aqiLevel.textContent = data.aqiBand.label;
   airEls.aqiLevel.dataset.tone = data.aqiBand.tone;
@@ -77,10 +77,10 @@ function renderAirQuality(data,{cached=false}={}) {
   airEls.aqiDriver.textContent = data.dominant ? `Main AQI driver: ${data.dominant.label}` : "Dominant pollutant unavailable";
   airEls.pm25Metric.textContent = formatConcentration(data.pm25);
   airEls.pm10Metric.textContent = formatConcentration(data.pm10);
-  airEls.uvMetric.textContent = Number.isFinite(Number(data.uv)) ? Number(data.uv).toFixed(1) : "—";
+  airEls.uvMetric.textContent = Number.isFinite(data.uv) ? data.uv.toFixed(1) : "—";
   airEls.uvDetail.textContent = `${data.uvBand.label} UV exposure`;
   airEls.ozoneMetric.textContent = formatConcentration(data.ozone);
-  airEls.pollenMetric.textContent = data.pollen ? `${Math.round(data.pollen.value)} grains/m³` : "—";
+  airEls.pollenMetric.textContent = data.pollen && Number.isFinite(data.pollen.value) ? `${Math.round(data.pollen.value)} grains/m³` : "—";
   airEls.pollenDetail.textContent = data.pollen ? `${data.pollen.label} is highest` : "Seasonal European pollen data may be unavailable";
   airEls.airUpdated.textContent = cached ? "Cached atmospheric data" : `Updated ${String(data.time || "").replace("T"," ")}${data.timezoneAbbr ? ` ${data.timezoneAbbr}` : ""}`;
   setAirStatus(cached ? "Live air-quality data is unavailable; showing a recent cached reading." : "");

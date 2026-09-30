@@ -44,6 +44,15 @@ function fixture() {
 }
 
 {
+  const api = fixture();
+  api.current.time = "2026-09-10T22:15";
+  api.hourly.time = Array.from({length:20},(_,i)=>`2026-09-10T${String(i).padStart(2,"0")}:00`);
+  const data = core.normalizeForecast(api);
+  assert.equal(data.hours[0].time,"2026-09-10T08:00","a current time past the series must keep the latest hours");
+  assert.equal(data.hours[11].time,"2026-09-10T19:00");
+}
+
+{
   const bad = fixture();
   delete bad.hourly.time;
   assert.throws(()=>core.normalizeForecast(bad),/incomplete/);
@@ -70,8 +79,18 @@ function fixture() {
   assert.equal(core.formatTime("2026-09-10T13:45:00"),"1:45 PM");
   assert.equal(core.formatTime("2026-09-10T13"),"—","a timestamp without minutes must not render the word undefined");
   assert.equal(core.formatWindReading(undefined,"celsius"),"—","missing gusts must not become zero");
+  assert.equal(core.formatWindReading(null,"celsius"),"—","JSON null wind must not become zero");
   assert.equal(core.formatWindReading(0,"celsius"),"0 km/h");
   assert.equal(core.formatWindReading(12.6,"fahrenheit"),"13 mph");
+  assert.equal(core.formatTemp(null),"—");
+  assert.equal(core.formatTemp(0),"0°");
+  assert.equal(core.formatTemp(""),"—");
+  assert.equal(core.formatPct(null),"—");
+  assert.equal(core.formatPct(0),"0%");
+  assert.deepEqual(core.weatherForCode(0),["Clear sky","☀","clear"]);
+  assert.deepEqual(core.weatherForCode(null),["Variable conditions","☁","cloud"],"a missing weather code is not clear sky");
+  assert.equal(core.windDirection(null),"");
+  assert.equal(core.windDirection(0),"N");
   assert.equal(core.isCurrentModelHour("2026-09-10T13:00","2026-09-10T13:35"),true);
   assert.equal(core.isCurrentModelHour("2026-09-10T06:00","2026-09-10T05:10"),false,"an earlier hour is not Now");
   assert.equal(core.isCurrentModelHour("","2026-09-10T13:35"),false);
@@ -90,6 +109,8 @@ function fixture() {
     "cache identity must follow the same 4-decimal location key as favorites"
   );
   assert.notEqual(core.cacheKey({lat:51.5,lon:-0.12},"celsius"),core.cacheKey({lat:51.5,lon:-0.12},"fahrenheit"));
+  assert.equal(core.cacheKey({lat:null,lon:0},"celsius"),"skycastForecast:v4:na:0.0000:celsius");
+  assert.notEqual(core.cacheKey({lat:null,lon:0},"celsius"),core.cacheKey({lat:0,lon:0},"celsius"));
 }
 
 {
@@ -100,6 +121,20 @@ function fixture() {
   assert.equal(insight.windiest.date,"2026-09-15");
   assert.equal(insight.clearest,3);
   assert.equal(core.deriveInsights([]),null);
+  const winter = core.deriveInsights([
+    {date:"2026-01-01",high:null,rainChance:null,wind:null,code:null},
+    {date:"2026-01-02",high:-8,rainChance:10,wind:5,code:3},
+    {date:"2026-01-03",high:-2,rainChance:0,wind:12,code:0},
+  ]);
+  assert.equal(winter.warmest.date,"2026-01-03","a missing high must not beat a negative temperature");
+  assert.equal(winter.wettest.date,"2026-01-02");
+  assert.equal(winter.windiest.date,"2026-01-03");
+  assert.equal(winter.clearest,1,"a null weather code must not count as clear");
+  const missing = core.deriveInsights([{date:"2026-01-01",high:null,rainChance:null,wind:null,code:null}]);
+  assert.equal(missing.warmest,null);
+  assert.equal(missing.wettest,null);
+  assert.equal(missing.windiest,null);
+  assert.equal(missing.clearest,0);
 }
 
 console.log("forecast-core: all unit tests passed");

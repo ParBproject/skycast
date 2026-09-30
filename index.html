@@ -97,7 +97,7 @@
               <p id="aqiAdvice" class="air-advice">Loading atmospheric conditions…</p>
               <div id="aqiDriver" class="air-driver">Assessing dominant pollutant</div>
             </div>
-            <div class="air-metrics">
+            <div class="air-metrics" tabindex="0" aria-label="Particulate, UV, ozone, and pollen readings">
               <div class="air-metric"><span>PM2.5</span><strong id="pm25Metric">—</strong><small>Fine particulate matter</small></div>
               <div class="air-metric"><span>PM10</span><strong id="pm10Metric">—</strong><small>Coarse particulate matter</small></div>
               <div class="air-metric"><span>UV index</span><strong id="uvMetric">—</strong><small id="uvDetail">UV exposure</small></div>
@@ -111,12 +111,12 @@
 
         <section class="panel panel-pad" aria-label="Next twelve hours">
           <div class="panel-head"><div><h2 class="panel-title">Next 12 hours</h2><p class="panel-copy">Temperature, condition, precipitation probability, and wind by hour.</p></div><span id="cacheLabel" class="last-updated">Live model data</span></div>
-          <div id="hourlyGrid" class="hourly-grid"></div>
+          <div id="hourlyGrid" class="hourly-grid" tabindex="0" aria-label="Hourly forecast"></div>
         </section>
 
         <section class="panel panel-pad" aria-label="Seven day forecast">
           <div class="panel-head"><div><h2 class="panel-title">7-day outlook</h2><p class="panel-copy">Daily high, low, weather condition, precipitation probability, and peak wind.</p></div><span id="timezoneLabel" class="last-updated">Local timezone</span></div>
-          <div id="forecastGrid" class="forecast-grid"></div>
+          <div id="forecastGrid" class="forecast-grid" tabindex="0" aria-label="Seven day forecast"></div>
         </section>
 
         <section class="section-grid" aria-label="Temperature trend and forecast insights">

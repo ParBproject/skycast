@@ -59,6 +59,28 @@ test("dominantPollutant selects the highest component AQI",()=>{
 test("pollenSummary ignores missing values and selects the highest available pollen",()=>{
   const result = pollenSummary({alder_pollen:null,birch_pollen:4,grass_pollen:18,ragweed_pollen:2});
   assert.deepEqual(result,{label:"Grass",value:18});
+  assert.equal(pollenSummary({alder_pollen:null,birch_pollen:null,grass_pollen:null,mugwort_pollen:null,olive_pollen:null,ragweed_pollen:null}),null);
+});
+
+test("JSON null measurements stay missing while real zeros remain",()=>{
+  assert.equal(aqiBand(null).label,"Unavailable");
+  assert.equal(aqiBand(0).label,"Good");
+  assert.equal(uvBand(null).label,"Unavailable");
+  assert.equal(uvBand(0).label,"Low");
+  assert.equal(dominantPollutant({european_aqi_pm2_5:null,european_aqi_ozone:null}),null);
+  assert.deepEqual(dominantPollutant({european_aqi_pm10:0,european_aqi_ozone:null}),{label:"PM10",index:0});
+  const data = normalizeAirQuality({current:{european_aqi:null,pm2_5:null,ozone:0,uv_index:0,alder_pollen:null,grass_pollen:null}});
+  assert.equal(data.aqi,null);
+  assert.equal(data.aqiBand.label,"Unavailable");
+  assert.equal(data.pm25,null);
+  assert.equal(data.ozone,0);
+  assert.equal(data.uv,0);
+  assert.equal(data.uvBand.label,"Low");
+  assert.equal(data.pollen,null);
+  assert.equal(data.dominant,null);
+  assert.throws(()=>buildAirQualityURL({lat:null,lon:null}),/invalid/);
+  assert.throws(()=>buildAirQualityURL({lat:"",lon:0}),/invalid/);
+  assert.equal(new URL(buildAirQualityURL({lat:0,lon:0})).searchParams.get("latitude"),"0");
 });
 
 test("normalizeAirQuality produces a compact atmospheric model",()=>{
@@ -80,7 +102,9 @@ test("normalizeAirQuality rejects incomplete payloads",()=>{
 });
 
 test("air-quality cache keys are coordinate-specific and TTL boundaries are enforced",()=>{
-  assert.equal(airQualityCacheKey({lat:43.65321,lon:-79.38318}),"skycastAir:v1:43.6532:-79.3832");
+  assert.equal(airQualityCacheKey({lat:43.65321,lon:-79.38318}),"skycastAir:v2:43.6532:-79.3832");
+  assert.equal(airQualityCacheKey({lat:0,lon:0}),"skycastAir:v2:0.0000:0.0000");
+  assert.throws(()=>airQualityCacheKey({lat:null,lon:0}),/invalid/);
   const now = 10_000_000;
   assert.equal(isAirCacheFresh(now-AIR_CACHE_TTL_MS,now),true);
   assert.equal(isAirCacheFresh(now-AIR_CACHE_TTL_MS-1,now),false);
