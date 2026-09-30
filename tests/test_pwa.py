@@ -75,7 +75,7 @@ class SkyCastPwaTests(unittest.TestCase):
         self.assertNotRegex(css, r"\.install-btn\s*\{[^}]*display\s*:\s*none")
 
     def test_service_worker_revalidates_the_current_shell_only(self):
-        self.assertIn("skycast-shell-v7", self.worker)
+        self.assertIn("skycast-shell-v8", self.worker)
         self.assertNotIn("caches.match(", self.worker)
         self.assertIn("function canStore", self.worker)
         self.assertIn("response.ok", self.worker)

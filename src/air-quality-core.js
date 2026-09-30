@@ -16,8 +16,14 @@
   };
 
   function finite(value) {
-    const number = Number(value);
-    return Number.isFinite(number) ? number : null;
+    if (typeof value === "number") return Number.isFinite(value) ? value : null;
+    if (typeof value === "string") {
+      const trimmed = value.trim();
+      if (!trimmed) return null;
+      const number = Number(trimmed);
+      return Number.isFinite(number) ? number : null;
+    }
+    return null;
   }
 
   function buildAirQualityURL(location) {
@@ -102,7 +108,7 @@
     const lat = finite(location?.lat);
     const lon = finite(location?.lon);
     if (lat === null || lon === null) throw new Error("Location coordinates are invalid");
-    return `skycastAir:v1:${lat.toFixed(4)}:${lon.toFixed(4)}`;
+    return `skycastAir:v2:${lat.toFixed(4)}:${lon.toFixed(4)}`;
   }
 
   function isAirCacheFresh(savedAt, now = Date.now(), ttl = AIR_CACHE_TTL_MS) {

@@ -123,6 +123,30 @@ class SkyCastProjectTests(unittest.TestCase):
         self.assertNotIn("wind_gusts_10m || 0", self.app)
         self.assertIn("loadAirQuality(activeLocation,{force:true})", self.app)
 
+    def test_missing_measurements_are_not_rendered_as_zero(self):
+        self.assertIn("function finiteNumber", self.core)
+        self.assertIn("finiteNumber(d.high)", self.app)
+        self.assertIn("searchSequence", self.app)
+        self.assertIn("sequence !== searchSequence", self.app)
+        self.assertGreaterEqual(self.app.count("No matching locations found."), 2)
+        air = (ROOT / "air-quality.js").read_text(encoding="utf-8")
+        self.assertIn("Number.isFinite(data.aqi)", air)
+        self.assertNotIn("Number(data.aqi)", air)
+        self.assertIn("skycastAir:v2:", (ROOT / "src" / "air-quality-core.js").read_text(encoding="utf-8"))
+
+    def test_search_results_stay_inside_the_hero(self):
+        css = (ROOT / "styles" / "location.css").read_text(encoding="utf-8")
+        block = css.split(".location-results", 1)[1].split("}", 1)[0]
+        self.assertIn("max-height", block)
+        self.assertNotIn("position: absolute", block)
+        self.assertIn("flex-wrap: wrap", css)
+
+    def test_narrow_layout_can_shrink_dashboard_tracks(self):
+        css = (ROOT / "styles.css").read_text(encoding="utf-8")
+        self.assertIn(".dashboard > *", css)
+        self.assertIn("min-width: 0", css)
+        self.assertNotRegex(css, r"\.live-pill\s*\{[^}]*display\s*:\s*none")
+
     def test_location_search_supports_keyboard_and_named_groups(self):
         self.assertIn('aria-expanded="false"', self.index)
         self.assertIn('role="group" aria-label="Favorite locations"', self.index)

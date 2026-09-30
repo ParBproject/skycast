@@ -37,8 +37,9 @@ SkyCast turns live Open-Meteo forecast, geocoding, and atmospheric data into a f
 - 22 curated European presets for fast exploration
 - Favorite locations stored locally with coordinate-based deduplication and an eight-location cap
 - Shareable forecast URLs that preserve latitude, longitude, display name, and temperature unit
-- Current modeled conditions plus next-12-hours temperature, condition, precipitation probability, and wind
-- Seven-day high/low temperatures, WMO weather-code summaries, rain risk, wind, gusts, and daylight details
+- Current modeled conditions, including feels-like temperature, humidity, wind, gusts, cloud cover, today's rain probability, and sunrise/sunset
+- Next-12-hours temperature, condition, precipitation probability, and wind
+- Seven-day high/low temperatures, WMO weather-code summaries, rain risk, and peak wind
 - European Air Quality Index interpretation with Good → Extremely poor bands
 - PM2.5, PM10, ozone, UV index, dominant AQI pollutant, and highest available seasonal pollen signal
 - Independent short-lived atmospheric cache so weather remains usable if air-quality data fails
@@ -141,11 +142,11 @@ The CI pipeline runs structural regression checks, JavaScript syntax validation,
 
 Python checks verify required dashboard/search/atmospheric regions, local asset integrity, modular architecture, provider wiring, curated city coverage, PWA contracts, CAMS attribution, offline isolation, README previews, and legacy routing.
 
-Forecast-core Node tests cover seven-day normalization, the 12-hour slice, malformed payload rejection, Celsius/Fahrenheit request parameters, WMO fallback, compass/time formatting, cache TTL boundaries, and derived weekly insights.
+Forecast-core Node tests cover seven-day normalization, the 12-hour slice, malformed payload rejection, Celsius/Fahrenheit request parameters, WMO fallback, compass/time formatting, cache TTL boundaries, derived weekly insights, and JSON nulls that must not render as zero.
 
 Location-core Node tests cover coordinate bounds, geocoding request construction, result normalization, duplicate suppression, favorite add/remove behavior, favorites limits, and share-link round trips.
 
-Air-quality-core Node tests cover API URL construction, invalid coordinates, European AQI thresholds, UV bands, dominant pollutant selection, pollen handling, payload normalization, coordinate-specific cache keys, and TTL boundaries.
+Air-quality-core Node tests cover API URL construction, invalid coordinates, European AQI thresholds, UV bands, dominant pollutant selection, pollen handling, payload normalization, coordinate-specific cache keys, TTL boundaries, and missing JSON nulls that must stay unavailable rather than zero.
 
 Run all checks locally with:
 

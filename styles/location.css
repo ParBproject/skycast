@@ -9,6 +9,8 @@
 .location-search {
   position: relative;
   display: flex;
+  flex-wrap: wrap;
+  align-items: center;
   min-width: 0;
   border: 1px solid rgba(160,190,220,.18);
   border-radius: 14px;
@@ -22,12 +24,13 @@
   height: 48px;
   padding: 0 14px;
   border: 0;
-  outline: 0;
   background: transparent;
   color: #eef6ff;
   font: inherit;
 }
 .location-search input::placeholder { color: #71889f; }
+.location-search input:focus { outline: none; }
+.location-search input:focus-visible { outline: 2px solid #9fd0ff; outline-offset: -3px; }
 .location-search button {
   margin: 5px;
   padding: 0 14px;
@@ -42,19 +45,18 @@
 .location-search button:disabled { opacity: .55; cursor: progress; }
 
 .location-results {
-  position: absolute;
-  z-index: 20;
-  top: calc(100% + 8px);
-  left: 0;
-  right: 0;
-  overflow: hidden;
+  position: relative;
+  z-index: 1;
+  flex: 1 0 100%;
+  max-height: min(280px, 46vh);
+  margin: 0 6px 6px;
+  overflow: auto;
+  overscroll-behavior: contain;
   border: 1px solid rgba(160,190,220,.20);
-  border-radius: 15px;
+  border-radius: 12px;
   background: rgba(6,17,30,.98);
-  box-shadow: 0 22px 55px rgba(0,0,0,.38);
-  backdrop-filter: blur(18px);
 }
-.location-result {
+.location-search .location-result {
   display: grid;
   width: 100%;
   gap: 3px;
@@ -84,6 +86,7 @@
   align-items: center;
   gap: 8px;
   width: 100%;
+  min-width: 0;
   margin-top: 10px;
   overflow-x: auto;
   padding-bottom: 2px;

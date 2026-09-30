@@ -15,9 +15,29 @@
     95:["Thunderstorm","⛈","rain"],96:["Thunderstorm with hail","⛈","rain"],99:["Severe thunderstorm with hail","⛈","rain"]
   };
 
-  function weatherForCode(code) { return WMO[Number(code)] || ["Variable conditions","☁","cloud"]; }
-  function formatTemp(value) { return Number.isFinite(Number(value)) ? `${Math.round(Number(value))}°` : "—"; }
-  function formatPct(value) { return Number.isFinite(Number(value)) ? `${Math.round(Number(value))}%` : "—"; }
+  function finiteNumber(value) {
+    if (typeof value === "number") return Number.isFinite(value) ? value : null;
+    if (typeof value === "string") {
+      const trimmed = value.trim();
+      if (!trimmed) return null;
+      const number = Number(trimmed);
+      return Number.isFinite(number) ? number : null;
+    }
+    return null;
+  }
+  function weatherForCode(code) {
+    const value = finiteNumber(code);
+    if (value === null) return ["Variable conditions","☁","cloud"];
+    return WMO[value] || ["Variable conditions","☁","cloud"];
+  }
+  function formatTemp(value) {
+    const number = finiteNumber(value);
+    return number === null ? "—" : `${Math.round(number)}°`;
+  }
+  function formatPct(value) {
+    const number = finiteNumber(value);
+    return number === null ? "—" : `${Math.round(number)}%`;
+  }
   function formatTime(localIso) {
     const clock = String(localIso || "").split("T")[1] || "";
     const [h, m] = clock.split(":");
@@ -29,8 +49,8 @@
     return `${hour % 12 || 12}:${String(minute).padStart(2, "0")} ${suffix}`;
   }
   function formatWindReading(speed, unit) {
-    const value = Number(speed);
-    if (!Number.isFinite(value)) return "—";
+    const value = finiteNumber(speed);
+    if (value === null) return "—";
     return `${Math.round(value)} ${unit === "fahrenheit" ? "mph" : "km/h"}`;
   }
   function isCurrentModelHour(hourTime, currentTime) {
@@ -39,8 +59,8 @@
     return hour.length >= 13 && current.length >= 13 && hour.slice(0, 13) === current.slice(0, 13);
   }
   function windDirection(degrees) {
-    const value = Number(degrees);
-    if (!Number.isFinite(value)) return "";
+    const value = finiteNumber(degrees);
+    if (value === null) return "";
     const dirs = ["N","NE","E","SE","S","SW","W","NW"];
     const normalized = ((value % 360) + 360) % 360;
     return dirs[Math.round(normalized / 45) % 8];
@@ -52,15 +72,15 @@
     return `${hours} hr${hours === 1 ? "" : "s"} ago`;
   }
   function cacheKey(city, unit) {
-    const lat = Number(city && city.lat);
-    const lon = Number(city && city.lon);
-    const latKey = Number.isFinite(lat) ? lat.toFixed(4) : "na";
-    const lonKey = Number.isFinite(lon) ? lon.toFixed(4) : "na";
+    const lat = finiteNumber(city && city.lat);
+    const lon = finiteNumber(city && city.lon);
+    const latKey = lat === null ? "na" : lat.toFixed(4);
+    const lonKey = lon === null ? "na" : lon.toFixed(4);
     return `skycastForecast:v4:${latKey}:${lonKey}:${unit}`;
   }
   function isCacheFresh(savedAt, now = Date.now(), ttl = CACHE_TTL_MS) {
-    const saved = Number(savedAt);
-    return Number.isFinite(saved) && now >= saved && now - saved <= ttl;
+    const saved = finiteNumber(savedAt);
+    return saved !== null && now >= saved && now - saved <= ttl;
   }
 
   function buildForecastURL(city, unit) {
@@ -89,7 +109,7 @@
     }));
     const currentHour = `${String(api.current.time || "").slice(0,13)}:00`;
     let start = h.time.findIndex(time => time >= currentHour);
-    if (start < 0) start = 0;
+    if (start < 0) start = Math.max(0, h.time.length - 12);
     const hours = h.time.slice(start,start+12).map((time,offset) => {
       const index = start + offset;
       return {time, temp:h.temperature_2m?.[index], feels:h.apparent_temperature?.[index], rainChance:h.precipitation_probability?.[index], code:h.weather_code?.[index], wind:h.wind_speed_10m?.[index], isDay:h.is_day?.[index]};
@@ -99,12 +119,23 @@
 
   function deriveInsights(days) {
     if (!Array.isArray(days) || days.length === 0) return null;
-    const warmest = days.reduce((a,b)=>Number(b.high)>Number(a.high)?b:a);
-    const wettest = days.reduce((a,b)=>Number(b.rainChance||0)>Number(a.rainChance||0)?b:a);
-    const windiest = days.reduce((a,b)=>Number(b.wind||0)>Number(a.wind||0)?b:a);
-    const clearest = days.filter(d=>[0,1,2].includes(Number(d.code))).length;
-    return {warmest, wettest, windiest, clearest};
+    const pickMax = (field) => days.reduce((winner, day) => {
+      const value = finiteNumber(day?.[field]);
+      if (value === null) return winner;
+      if (!winner || value > winner.value) return {day, value};
+      return winner;
+    }, null);
+    const warmest = pickMax("high");
+    const wettest = pickMax("rainChance");
+    const windiest = pickMax("wind");
+    const clearest = days.filter(day => [0,1,2].includes(finiteNumber(day?.code))).length;
+    return {
+      warmest: warmest ? warmest.day : null,
+      wettest: wettest ? wettest.day : null,
+      windiest: windiest ? windiest.day : null,
+      clearest
+    };
   }
 
-  return { CACHE_TTL_MS, WMO, weatherForCode, formatTemp, formatPct, formatTime, formatWindReading, isCurrentModelHour, windDirection, ageLabel, cacheKey, isCacheFresh, buildForecastURL, normalizeForecast, deriveInsights };
+  return { CACHE_TTL_MS, WMO, finiteNumber, weatherForCode, formatTemp, formatPct, formatTime, formatWindReading, isCurrentModelHour, windDirection, ageLabel, cacheKey, isCacheFresh, buildForecastURL, normalizeForecast, deriveInsights };
 });
